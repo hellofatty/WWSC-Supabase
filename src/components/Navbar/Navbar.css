@@ -54,7 +54,7 @@ ul.dropdown-menu.show {
     color: white;
     font-size: clamp(1rem, 0.8214rem + 0.4762vw, 1.25rem);
     white-space: nowrap;
-    padding: 5px 15px;
+    padding: 10px 15px;
 }
 
 .dropdown-item:hover {
@@ -84,6 +84,18 @@ ul.dropdown-menu.show {
 @media screen and (max-width: 992px) {
     .navbar-container {
         flex-direction: column;
+        align-items: center;
         height: fit-content;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        gap: 0.2rem;
+    }
+
+    .dropdown-item {
+        border-bottom: 1px solid lightseagreen;
+        color: white;
+        font-size: clamp(1rem, 0.8214rem + 0.4762vw, 1.25rem);
+        white-space: nowrap;
+        padding: 0px 15px;
     }
 }
