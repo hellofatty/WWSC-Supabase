@@ -1,0 +1,42 @@
+/** @format */
+
+.referee-home {
+    display: flex;
+    /* flex-direction: row;
+    justify-content: flex-start;
+    align-items: top; */
+}
+
+.step-number {
+    color: teal;
+    padding-bottom: 3px;
+    margin-right: 10px;
+    font-size: 1rem;
+}
+
+.img-layout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid lightgrey;
+    padding: 5px;
+    border-radius: 5px;
+    margin-bottom: 12px;
+    margin-top: 12px;
+}
+
+
+.rs-list-item {
+    /* margin-bottom: 10px; */
+    padding-left: 1rem;
+    font-size: 0.9rem;
+    line-height: 2rem;
+    color: teal;
+}
+
+@media screen and (max-width: 992px) {
+    .referee-home {
+        display: flex;
+        /* flex-direction: column; */
+    }
+}

@@ -1,0 +1,19 @@
+.file-download-link {
+    color: #2196f3;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.file-download-link:hover {
+    text-decoration: underline;
+    color: #1976d2;
+}
+
+.error-message {
+    color: #f44336;
+    text-align: center;
+    padding: 16px;
+}
+

@@ -1,0 +1,208 @@
+/** @format */
+
+.referee-list-container {
+    font-size: 14px;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.referee-list-container h2 {
+    margin-left: 25px;
+    margin-bottom: 20px;
+}
+
+.referee-list-filter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.referee-list-filter-bar > span {
+    font-size: 0.8rem;
+}
+
+.referee-list-select-container {
+    /* flex:4; */
+    margin-left: 20px;
+}
+
+.referee-list-select-container > span {
+    font-size: 0.8rem;
+    width: 60px;
+}
+
+.searchbar {
+    width: 600px;
+    margin-left: 20px;
+    /* height: 50px; */
+    background-color: white;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.searchIcon {
+    font-size: 20px !important;
+    margin-left: 10px;
+    color: grey;
+}
+
+.searchInput {
+    border: 1px solid lightgrey;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    border-radius: 5px;
+    width: 70%;
+    padding-left: 12px;
+    font-size: 0.8rem;
+}
+
+.searchInput:focus {
+    outline: none;
+}
+
+.referee-list-layout-icon {
+    display: flex;
+    margin-right: 100px;
+    color: grey;
+    /* gap: 2px; */
+    margin-left: auto;
+    justify-content: flex-start;
+    align-items: center;
+    font-size: smaller;
+}
+
+.online-user {
+    display: inline-block;
+    margin-left: 32px;
+    position: absolute;
+    z-index: 1000;
+    width: 8px;
+    height: 8px;
+    background: #0ebb50;
+    border-radius: 50%;
+    margin-top: 2px;}
+
+/* Referee List Car Layout */
+
+.referee-list-card-container {
+    flex: 3;
+    display: flex;
+    /* flex-wrap: nowrap; */
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    width: 100%;
+    height: auto;
+    gap: 3px;
+    padding: 3px 3px;
+    margin-top: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.referee-list-card {
+    display: flex;
+    align-items: flex-start;
+    width: 280px;
+    height: auto;
+    margin-bottom: 12px;
+    border: 1px solid lightgray;
+    padding: 16px 12px;
+    border-radius: 10px;
+    gap: 12px;
+    margin-right: 3px;
+}
+.avatar-circle {
+    border-radius: 50%;
+    width: 42px;
+    height: 45px;
+    object-fit: cover;
+    border: 1px solid lightgray;
+    /* box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25); */
+}
+
+.referee-list-info {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    width: 100%;
+}
+
+.referee-list-name {
+    font-size: 1.1rem;
+    border-bottom: 1px solid white;
+    margin-bottom: 3px;
+    padding-bottom: 3px;
+}
+
+.referee-list-info .status-bar {
+    border: none;
+    /* padding: 10px 20px; */
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    padding-top: 3px;
+    text-align: center;
+    text-decoration: none;
+    /* display: inline-block; */
+    margin: 6px 6px;
+    width: 80px;
+    border-radius: 16px;
+    /* box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25); */
+}
+
+.referee-list-icon {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 6px;
+    cursor: pointer;
+    /* width: 100%; */
+}
+
+/* Referee List Table Layout */
+.referee-list-table-container {
+    margin-left: 20px; 
+    width: 90%;
+    padding-top: 10px;
+    /* margin: auto; */
+}
+
+.referee-list-table-container td .status-bar {
+    border: none;
+    /* padding: 10px 20px; */
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    padding-top: 3px;
+    text-align: center;
+    text-decoration: none;
+    /* display: inline-block; */
+    margin: auto;
+    width: 80px;
+    /* display: flex; */
+    border-radius: 16px;
+    /* box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25); */
+}
+
+.action-icons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.form-modal {
+    width: 95%;
+    font-size: 14px;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+
+    /* margin-bottom: 1vw;
+    margin-right: 1vw; */
+}

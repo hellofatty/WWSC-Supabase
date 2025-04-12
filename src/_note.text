@@ -1,0 +1,35 @@
+color:
+
+#0f597c
+#36a393
+#1f8bbf
+#fdb727
+#4d4d4f
+
+const getOrganizations = async () => {
+    const { data, error } = await supabase
+        .from('organizations')
+        .select('id, name');
+    
+    if (error) throw error;
+    return data;
+
+const { logout, isPending, error } = useLogoutSB();
+
+// Call logout when needed
+await logout();
+};
+
+// Example of fetching organization with referee data
+const { data, error } = await supabase
+    .from('organizations')
+    .select(`
+        *,
+        referee:referees (
+            id,
+            name,
+            referee_id,
+            grade
+        )
+    `)
+    .order('created_at', { ascending: false });

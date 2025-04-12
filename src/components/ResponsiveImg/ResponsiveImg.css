@@ -1,0 +1,19 @@
+/** @format */
+
+.res-img-container {
+    border: 1px solid lightgrey;
+    padding: 5px;
+    border-radius: 5px;
+    margin-bottom: 12px;
+    margin-top: 12px;
+}
+
+.res-iframe-container iframe {
+    border: 1px solid lightgrey;
+    padding: 5px;
+    border-radius: 5px;
+    margin-bottom: 12px;
+    margin-top: 12px;
+    box-shadow: "0 2px 5px 0 rgba(0, 0, 0, 0.25)",
+    
+}

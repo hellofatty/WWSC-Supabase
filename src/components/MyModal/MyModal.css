@@ -1,10 +1,13 @@
+/** @format */
+
 .close {
-    font-size: 1vw;
     font-weight: bold;
-    width: 2vw;
-    height: 2vw;
+
     text-align: center;
 
-    border-radius: 50%;
-    border-width: 0.1vw;
+    /* /* border-radius: 50%; */
+}
+
+.modal-header {
+    font-size: 48px;
 }

@@ -4,27 +4,27 @@
     /* border: rgb(200, 200, 200) solid; */
     border-radius: 0.5vw;
 
-    margin-top: 0vw;
     /* margin-bottom: 8px; */
 }
 
 .text-drop button {
-    font-size: clamp(1rem, 0.8214rem + 0.4762vw, 1.25rem);
+    font-size: 0.8rem;
     /* font-weight: bold; */
     padding: 12px;
     color: tomato;
-    font-weight: 600;
-    margin-bottom: 8px;
+    font-weight: 500;
+    margin-bottom: 10px;
 }
 
 .text-drop p {
     padding-left: 2vw;
     padding-right: 1.5vw;
-    /* font-size: 18px; */
+   font-size: 0.8rem;
     text-indent: 0;
 
 }
 
 .text-drop p img {
-    width: 25vw;
+    width: 30%;
+   
 }

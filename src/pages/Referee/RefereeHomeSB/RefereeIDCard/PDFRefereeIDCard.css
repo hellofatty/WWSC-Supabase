@@ -1,0 +1,133 @@
+/** @format */
+
+.card-header-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 12px;
+    /* margin: auto; */
+}
+
+.card-heder-logo{
+
+    width: 20%;
+
+}
+
+.card-title-wrapper {
+    width:80%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* align-items: center; */
+}
+
+.card-page-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1f497d;
+    font-family: "Times New Roman", Times, serif;
+    text-align: center;
+    text-wrap: nowrap;
+    margin-bottom: 6px;
+}
+
+.card-page-subtitle {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1f497d;
+    text-align: center;
+}
+
+.card-main-container {
+    background-image: url(WWSC-logo_back.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 320px, 300px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.referee-id-card-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    flex-wrap: wrap;
+    /* margin-bottom: 12px; */
+}
+
+.card-content-text{
+
+    margin: 20px 50px;
+    color: " #1F497D",
+
+} 
+
+.card-content-text p {
+    color: #1f497d;
+    text-indent: "0";
+    text-align: justify;
+    line-height: normal;
+    padding-left: 12px;
+    padding-right: 12px;
+    line-height: 2;
+}
+
+.secretary-signature {
+    background-image: url(Signature_1.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 230px, 130px;
+    width: 250px;
+    height: 60px;
+}
+
+.secretary-title{
+    margin-bottom: 6px;
+    font-weight: 600;
+    margin-right: 20px;
+    color: #1f497d;
+}
+
+.secretary-signed-date{
+    margin-bottom: 6px;
+    /* font-weight: 600; */
+    margin-right: 20px;
+    color: #1f497d;
+}
+
+
+.card-signature-container {
+    display: flex;
+    /* justify-content: flex-end; */
+    flex-direction: column;
+    font-size: 0.9rem;
+    align-items: flex-end;
+    margin-top: 1rem;
+    /* text-align: right; */
+}
+
+@media screen and (max-width: 992px) {
+ 
+    .card-page-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        width: 100%;
+     
+    }
+
+    .card-page-subtitle {
+        font-size: 1.1rem;
+        font-weight: 700;
+      
+    }
+    .referee-id-card-container {
+       flex-direction: column;
+        /* margin-bottom: 12px; */
+    }
+ 
+}
+

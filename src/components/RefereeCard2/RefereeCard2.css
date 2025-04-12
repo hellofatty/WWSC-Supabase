@@ -1,0 +1,132 @@
+/** @format */
+
+.referee-card-container {
+    width: 265px;
+    height: 400px;
+    margin: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    border-radius: 6px;
+    box-shadow: 6px 6px 10px 0px rgba(0, 0, 0, 0.2);
+    border: 0;
+}
+
+/* Referee ID Card Front Side */
+
+.referee-card-logo {
+    width: 60px;
+    margin-top: 14px;
+    filter: drop-shadow(1px 1px 1px lightgray);
+}
+
+.card-title {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5px;
+    
+}
+
+.card-title h4 {
+   margin-top: 3px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+}
+.card-title h5 {
+    color: white;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.referee-card-avatar {
+    /* background-size: cover; */
+    border-radius: 15px 0 0 0;
+    box-shadow: 6px 6px 10px 0px rgba(0, 0, 0, 0.2);
+}
+.referee-card-avatar img {
+    /* background-color: rgb(14, 222, 245); */
+    /* border: rgba(238, 236, 236, 0.539) solid; */
+    border-radius: 2px;
+    object-fit: cover;
+    width: 130px;
+    height: 146px;
+}
+
+.grade-bar {
+    margin: auto;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    width: 130px;
+    border-top: 1px solid grey;
+    font-size: 12px;
+}
+
+.referee-card-container .referee-grade {
+    color: white;
+    text-align: center;
+    letter-spacing: 2;
+}
+
+.referee-name {
+    /* display: flex;
+    flex-direction: row; */
+    color: white;
+    margin-top: 2px;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.referee-id {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    text-shadow: 1px, 1px, white;
+}
+
+.expiry-date {
+    display: flex;
+    color: white;
+    gap: 5px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Referee Card Backside */
+
+.referee-card-back-logo {
+    width: 30px;
+    filter: drop-shadow(1px 1px 1px lightgray);
+}
+
+.back-text-content {
+    margin-top: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.back-text-content p {
+    font-size: 0.6rem;
+    text-align: justify;
+    line-height:0.8rem;
+}
+
+.wwsc-contact-info {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.6rem;
+}
+
+.wwsc-title {
+    font-size: 0.7rem;
+    /* padding-top: 12px; */
+    margin-bottom: 8px;
+}

@@ -1,0 +1,32 @@
+/** @format */
+
+.rt-list-item {
+    margin-bottom: 8px;
+    padding-left: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.9rem;
+    color: teal;
+}
+
+.rt-form-item {
+    margin-bottom: 12px;
+    margin-top: 20px;
+    font-size: 0.9rem;
+}
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media screen and (max-width: 992px) {
+
+
+    .rt-list-item {
+        font-size: 0.8rem;
+    }
+}
+
+@media screen and (max-width: 600px) {
+
+
+    .rt-list-item {
+        font-size: 0.78rem;
+    }
+}

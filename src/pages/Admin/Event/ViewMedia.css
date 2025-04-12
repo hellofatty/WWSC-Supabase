@@ -1,0 +1,28 @@
+/** @format */
+
+.event-list-media-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.event-list-photos-container {
+    padding: 12px;
+    border-radius: 5px;
+    border: 1px solid lightgrey;
+}
+
+.event-list-videos-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.envent-list-video {
+    
+    /* padding: 6px;
+    border-radius: 5px;
+    border: 1px solid lightgrey; */
+}

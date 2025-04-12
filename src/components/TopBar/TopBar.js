@@ -1,116 +1,170 @@
 /** @format */
-import React from "react";
-import { useState, useEffect, useRef } from "react";
 
 // import style css file
 import "./TopBar.css";
 
 import { Link } from "react-router-dom";
+import { useLogout } from "../../hooks/useLogout";
+
+// import Material UI components and icons
+// import Avatar from "@mui/material/Avatar";
+import LogoutIcon from "@mui/icons-material/Logout";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import AccountBoxIcon from "@mui/icons-material/AccountBox";
+import LoginIcon from "@mui/icons-material/Login";
+import GTranslateIcon from "@mui/icons-material/GTranslate";
+import {useMediaQuery, Button, IconButton, Tooltip } from "@mui/material";
 
 // import UseTranslation hook
 import { useTranslation } from "react-i18next";
+import { useAuthContext } from "../../hooks/useAuthContext";
+
+const LANGUAGE_OPTIONS = [
+    { code: "en", lng: "English" },
+    { code: "zh-TW", lng: "繁體中文" },
+    { code: "zh-CN", lng: "简体中文" },
+];
 
 //Create Topbar component
 export default function TopBar() {
-    const languages = [
-        {
-            code: "en",
-            name: "English",
-        },
-        {
-            code: "zh-TW",
-            name: "繁體中文",
-        },
-        {
-            code: "zh-CN",
-            name: "简体中文",
-        },
-    ];
+    const { t, i18n } = useTranslation("global");
 
-    const [open, setOpen] = useState(false);
+    const { logout } = useLogout();
 
-    let menuRef = useRef();
+    const isSmallScreen = useMediaQuery("(max-width:900px)");
 
-    useEffect(() => {
-        let handler = (e) => {
-            if (!menuRef.current.contains(e.target)) {
-                setOpen(false);
-                console.log(menuRef.current);
-            }
-        };
+    // monitor current logged in user from Firebase Auth
+    const { user } = useAuthContext();
 
-        document.addEventListener("mousedown", handler);
-
-        return () => {
-            document.removeEventListener("mousedown", handler);
-        };
-    });
-
-    const { t, i18n } = useTranslation();
+    const renderAuthButtons = () =>
+        !user ? (
+            <>
+                <li>
+                    <Link to="/referee-home/signup">
+                        <div className="top-bar-btn">
+                            {!isSmallScreen ? (
+                                <Button
+                                    startIcon={<AccountBoxIcon />}
+                                    sx={{ fontSize: "0.8rem", textTransform: "none", fontWeight: "400" }}
+                                >
+                                    {t("topbar.signup")}
+                                </Button>
+                            ) : (
+                                <IconButton aria-label="signup" color="primary">
+                                    <Tooltip title={t("topbar.signup")} placement="top" arrow>
+                                        <AccountBoxIcon />
+                                    </Tooltip>
+                                </IconButton>
+                            )}
+                        </div>
+                    </Link>
+                </li>
+                <li>
+                    <Link to="/referee-home/login">
+                        <div className="top-bar-btn">
+                            {!isSmallScreen ? (
+                                <Button
+                                    startIcon={<LoginIcon />}
+                                    sx={{ fontSize: "0.8rem", textTransform: "none", fontWeight: "400" }}
+                                >
+                                    {t("topbar.login")}
+                                </Button>
+                            ) : (
+                                <IconButton aria-label="login" color="primary">
+                                    <Tooltip title={t("topbar.login")} placement="top" arrow>
+                                        <LoginIcon />
+                                    </Tooltip>
+                                </IconButton>
+                            )}
+                        </div>
+                    </Link>
+                </li>
+                <li>
+                    <div className="top-bar-btn">
+                        <span className="person-circle-icon">
+                            <AccountCircleIcon fontSize="large" style={{ color: "rgb(187, 186, 186)" }} />
+                        </span>
+                    </div>
+                </li>
+            </>
+        ) : (
+            <>
+                <li>
+                    <div className="top-bar-btn">
+                        {!isSmallScreen ? (
+                            <Button
+                                startIcon={<LogoutIcon />}
+                                sx={{ fontSize: "0.8rem", textTransform: "none", fontWeight: "400" }}
+                                onClick={logout}
+                            >
+                                {t("topbar.logout")}
+                            </Button>
+                        ) : (
+                            <IconButton aria-label="logout" color="primary" onClick={logout}>
+                                <Tooltip title={t("topbar.logout")} placement="left" arrow>
+                                    <LogoutIcon />
+                                </Tooltip>
+                            </IconButton>
+                        )}
+                    </div>
+                </li>
+                <li>
+                    <div className="top-bar-avatar-container">
+                        <Link to="/referee-zone/referee-home">
+                            <Tooltip title={t("navbar.rz_referee_system")}>
+                                <div className="referee-list-avater">
+                                    <img
+                                        className="profile-card-avatar-circle"
+                                        src={user.photoURL}
+                                        alt="referee avatar"
+                                        style={{ width: "35px", height: "35px" }}
+                                    />
+                                </div>
+                            </Tooltip>
+                        </Link>
+                        <span id="top-bar-user-displayname">
+                            {t("referee.sidebar.greeting")}, {user.displayName}
+                        </span>
+                    </div>
+                </li>
+            </>
+        );
 
     return (
-        <div className="top-bar">
-            <div className="top-bar-left">
-                <div className="top-bar-title">
+        <nav className="top-bar-container">
+            <ul>
+                <li className="top-bar-left">
                     <Link to="/">
-                        <img className="wwsc-small-logo" src="/WWSC-logo.png" alt="wwsc-small-logo" />
+                        <img className="top-bar-logo" src="/WWSC-logo.png" alt="Go to Home Page" />
                     </Link>
-                    <h2 style={{ color: "teal" }}>WWSC</h2>
-                </div>
-            </div>
-            <div className="top-bar-right">
-                <div className="lng-tooltip">{t("topbar.tool_tip")}</div>
-                <div className="lng-container" ref={menuRef}>
-                    <div
-                        className="select-container"
-                        onClick={() => {
-                            setOpen(!open);
-                        }}
-                    >
-                        <button className="lng-icon" type="button" style={{ color: "teal", fontSize: "1.6rem" }}>
-                            <i class="bi bi-translate"></i>
-                        </button>
-                    </div>
-                    <div className={`lng-dropdown-menu ${open ? "active" : "inactive"}`}>
-                        <ul>
-                            {languages.map(({ code, name }) => (
-                                <li
-                                    className="lng-dropdown-item"
-                                    key={code}
-                                    onClick={() => {
-                                        i18n.changeLanguage(code);
-                                        setOpen(!open);
-                                    }}
-                                >
-                                    {name}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
-
-                <div className="btns-container">
-                    <button className="btn-signup">
-                        <div className="btn-signup-content">
-                            <span classname="btn-signup-icon">
-                                <i class="bi bi-pencil-square" style={{ fontSize: "1.2rem" }}></i>
-                            </span>
-                            <span classname="btn-signup-text">{t("topbar.signup")}</span>
+                    <div className="top-bar-title-container">
+                        <div>
+                            <span className="top-bar-slogan">{t("topbar.slogan")}</span>
                         </div>
-                    </button>
+                        <span className="top-bar-title">{t("topbar.title")}</span>
+                        <span className="top-bar-subtitle">{t("topbar.subtitle")}</span>
+                    </div>
+                </li>
+                <div className="top-bar-right">
+                    {renderAuthButtons()}
 
-                    <Link to="/referee-home">
-                        <button className="btn-login">
-                            <div className="btn-login-content">
-                                <span classname="btn-login-icon">
-                                    <i class="bi bi-person-badge-fill" style={{ fontSize: "1.2rem" }}></i>
-                                </span>
-                                <span classname="btn-login-text"> {t("topbar.login")}</span>
-                            </div>
-                        </button>
-                    </Link>
+                    <li className="top-bar-lang-container">
+                        <span className={!isSmallScreen ? "top-bar-lang-icon" : "top-bar-none-lang-icon"}>
+                            <Tooltip title={t("topbar.select-lang")} placement="top" arrow>
+                                <GTranslateIcon fontSize="small" style={{ color: "#0275d8" }} />
+                            </Tooltip>
+                        </span>
+
+                        <select onChange={(e) => i18n.changeLanguage(e.target.value)} name="language" id="selectLang">
+                            {LANGUAGE_OPTIONS.map(({ code, lng }) => (
+                                <option key={code} value={code}>
+                                    {lng}
+                                </option>
+                            ))}
+                        </select>
+                    </li>
                 </div>
-            </div>
-        </div>
+            </ul>
+        </nav>
     );
 }

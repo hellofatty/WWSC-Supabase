@@ -1,6 +1,13 @@
 /** @format */
 
 .logo-img {
-    width: 120px;
+    width: 90px;
+    margin: 20px 0;
 }
 
+@media screen and (max-width: 992px) {
+    .logo-img {
+        width: 80px;
+        margin: 15px 0;
+    }
+}

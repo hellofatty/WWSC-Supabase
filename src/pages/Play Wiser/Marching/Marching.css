@@ -2,35 +2,93 @@
 
 .march-video-container {
     display: flex;
-    margin-top: 20px;
-    justify-content: space-between;
-    padding-top: 20px;
-    flex-wrap: wrap;
+    /* flex-direction: column; */
+    /* margin-top: 20px; */
+    align-items: flex-start;
+    justify-content: space-around;
+    padding-top: 10px;
     width: 100%;
-}
-
-.march-video-item {
-    flex: 40%;
-    margin-bottom: 20px;
-    margin-right: 20px;
-    /* display: flex;
-    align-items: start;
-    justify-content: flex-start; */
-    text-align: left;
+    gap: 12px;
 }
 
 .march-video-item p {
     text-indent: 0;
+    line-height: 1.1rem;
+   
 }
 
+/* .march-video-content {
+    margin-top: 5px;
+    border-radius: 5px;
+} */
+
 .march-video-content iframe {
-    flex: 60%;
     border-radius: 5px;
     display: flex;
     justify-content: center;
     align-items: center;
-    /* margin: 0 auto; */
-    padding: 10px;
+    margin: 0 auto;
+    padding: 5px;
     border: 1px solid lightgray;
     box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    width: 560px;
+    height: 315px;
+}
+
+@media screen and (max-width: 992px) {
+   
+    
+.march-video-item p {
+    text-indent: 0;
+    line-height: 1rem;
+    font-size: 0.78rem;
+}
+
+    .march-video-content {
+        /* margin-top: 20px; */
+        margin-bottom: 20px;
+        margin: 0, auto;
+
+        /* display: flex;
+        align-items: start;
+        justify-content: flex-start; */
+    }
+
+    .march-video-content iframe {
+        width: 450px;
+        height: 252px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .march-video-container {
+        flex-direction: column;
+        
+        align-items: flex-start;
+        justify-content: space-around;
+       
+        width: 100%;
+    }
+
+    
+.march-video-item p {
+    text-indent: 0;
+    line-height: 1rem;
+    font-size: 0.78rem;
+}
+
+    .march-video-content {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        margin: 0, auto;
+width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .march-video-content iframe {
+        width: 330px;
+        height:185px;
+    }
 }

@@ -7,12 +7,13 @@ import { useLocation, Link } from "react-router-dom";
 import { Breadcrumb, BreadcrumbItem } from "reactstrap";
 
 export default function NewBread() {
-
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
+    // const lang = i18n.language;
 
     const location = useLocation();
     console.log(location);
     let currentLink = "";
+    console.log(currentLink);
 
     let crumbs = location.pathname
         .split("/")
@@ -55,7 +56,13 @@ export default function NewBread() {
         </div>
     );
 
-    const display = location.pathname !== "/" && !(location.pathname.slice(1).split("-")[0] === "referee");
+    const display =
+        location.pathname !== "/" &&
+        !(location.pathname.slice(1).split("/")[1] === "referee-home") &&
+        !(location.pathname.slice(1).split("/")[0] === "admin-zone");
+    // const display = location.pathname !== "/" && !(location.pathname.slice(1).split("-")[0] === "referee");
+
+    // console.log(location.pathname.slice(1).split("/")[0]);
 
     return (
         <>

@@ -1,33 +1,39 @@
-import './MyModal.css'
+/** @format */
 
-import React, { useState } from 'react';
-import { Button, Modal, ModalHeader, ModalBody} from 'reactstrap';
-import RefereeTraining from '../../pages/Referee/RefereeTraining/RefereeTraining';
+import "./MyModal.css";
 
-function Example({ uid, buttonTitle }) {
+import React, { useState } from "react";
+import { Button, Modal, ModalHeader, ModalBody } from "reactstrap";
+import RefereeTraining from "../../pages/Referee/No_Use_RefereeTraining/RefereeTraining";
+import { useTranslation } from "react-i18next";
+
+function MyModal({ uid, buttonTitle }) {
+    const { t } = useTranslation("global");
+
     const [modal, setModal] = useState(false);
 
     const toggle = () => setModal(!modal);
 
-    // const closeBtn = (
-    //     <button className="close" onClick={toggle} type="button">
-    //         X
-    //     </button>
-    // );
-
     const closeBtn = (
-        <Button className="close" onClick={toggle} size="lg" color='danger' outline>
-            X
+        <Button onClick={toggle} size="lg" color="seconday">
+            <i class="bi bi-x-circle" style={{ fontSize: "2rem", color: "gray" }}></i>
         </Button>
     );
 
     return (
         <div>
-            <Button color="primary" size="lg" onClick={toggle} style={{ width: "20rem", height: "5rem", fontSize: "1.75rem", fontWeight: "bold" }}>
+            <Button
+                color="primary"
+                size="lg"
+                onClick={toggle}
+                style={{ width: "150px", height: "40px", fontSize: "14px", fontWeight: "bold" }}
+            >
                 {buttonTitle}
             </Button>
-            <Modal isOpen={modal} toggle={toggle} backdrop="static" size='xl' centered={true}>
-                <ModalHeader toggle={toggle} close={closeBtn}>Input Training Record</ModalHeader>
+            <Modal isOpen={modal} toggle={toggle} backdrop="static" size="lg" centered={true} scrollable={false} >
+                <ModalHeader toggle={toggle} close={closeBtn}>
+                    <div className="page-primary-title">{t("referee.record.inputRecord")}</div>
+                </ModalHeader>
                 <ModalBody>
                     <RefereeTraining uid={uid} />
                 </ModalBody>
@@ -36,4 +42,4 @@ function Example({ uid, buttonTitle }) {
     );
 }
 
-export default Example;
+export default MyModal;

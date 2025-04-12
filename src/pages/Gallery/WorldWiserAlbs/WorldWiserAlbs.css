@@ -1,0 +1,295 @@
+/** @format */
+
+h3 {
+    padding-bottom: 15px;
+}
+
+/* .css-19kzrtu {
+    padding: 12px;
+} */
+
+.album-container {
+    background: #fefefe;
+    width: 100%;
+    text-align: left;
+    padding: 1vw 4vw 1vw 4vw;
+    margin: 0 auto;
+    /* border: 1px solid lightgray; */
+}
+
+.album-title {
+    color: tomato;
+    font-size: 1.3rem;
+    margin-top: 10px;
+    /* margin-bottom: 15px; */
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+
+    font-weight: 500;
+    /* letter-spacing: 1.2px; */
+    border-bottom: 1px solid rgb(228, 228, 228);
+}
+
+.album-item-title {
+    color: tomato;
+    font-size: 1.1rem;
+    margin-top: 15px;
+    text-align: center;
+    margin-bottom: 15px;
+    /* padding-left: 7px; */
+    /* line-height: 2; */
+    font-weight: 500;
+    /* letter-spacing: 1.2px; */
+    /* border-bottom: 1px solid rgb(228, 228, 228); */
+}
+
+.album-item-title-wrapper {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    /* margin-left: 15px; */
+    margin-bottom: 10px;
+}
+
+.album-org-title {
+    color: teal;
+    font-size: 1.1rem;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    padding-bottom: 3px;
+    /* line-height: 2; */
+    font-weight: 500;
+    letter-spacing: 1.2px;
+    /* border-bottom: 1px solid rgb(228, 228, 228); */
+}
+
+.album-flex {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    /* flex-wrap: wrap; */
+    /* gap: 15px;
+    margin-bottom: 20px; */
+}
+
+.carousel-item {
+    width: 80%;
+}
+
+.album-photo-item {
+    border-radius: 5px;
+    width: 80%;
+    height: auto;
+    padding: 3px;
+    padding-bottom: 5px;
+    border: 1px solid lightgray;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    margin: 0 auto;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.album-photo-item-small {
+    border-radius: 5px;
+    width: 100%;
+    height: auto;
+    padding: 2px;
+    padding-bottom: 3px;
+    border: 1px solid lightgray;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    margin: 0 auto;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.video-item-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 12px;
+}
+
+.album-mali-video-item {
+    border-radius: 5px;
+    padding-top: 6px;
+    padding: 6px;
+    padding-bottom: 6px;
+
+    border: 1px solid lightgray;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    margin: 0 auto;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.album-video-item {
+    border-radius: 5px;
+
+    padding: 6px;
+
+    border: 1px solid lightgray;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 12px;
+    width: fit-content;
+    /* transition: all 200ms ease-in-out; */
+}
+
+.us-album-video-item {
+    border-radius: 5px;
+    padding-bottom: 6px;
+    padding: 6px;
+    padding-top: 6px;
+    border: 1px solid lightgray;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    margin: 0 auto;
+    /* margin-bottom: 12px; */
+    display: flex;
+    justify-content: center;
+    width: fit-content;
+    align-items: center;
+
+    /* transition: all 200ms ease-in-out; */
+}
+
+.videoitem {
+    border-radius: 5px;
+    max-width: fit-content;
+    padding: 10px;
+    border: 1px solid lightgray;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    display: flex;
+}
+
+.tw_wiser_org_logo {
+    width: 120px;
+    margin-left: 5px;
+    margin-right: 25px;
+    border-radius: 50%;
+    border: 1px solid lightgrey;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
+.tw_wiser_names {
+    display: flex;
+    font-size: 1.2rem;
+    justify-content: flex-start;
+    gap: 1px;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid grey;
+    padding-bottom: 20px;
+}
+
+.tw_wiser_name_1,
+.tw_wiser_name_2 {
+    color: white;
+    background-color: teal;
+    padding: 10px 25px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+@media screen and (max-width: 1024px) {
+    .us-album-video-item iframe {
+        width: 320px;
+        height: 179px;
+    }
+}
+
+@media screen and (max-width: 900px) {
+    .album-title {
+        font-size: 1.1rem;
+        padding-bottom: 10px;
+        text-align: center;
+    }
+
+    /* .album-flex {
+        width: 80%;
+        /* flex-wrap: wrap; */
+    /* gap: 15px;
+        margin-bottom: 20px; */
+    /* } */
+
+    .album-video-item iframe {
+        width: 460px;
+        height: 265px;
+    }
+
+    .us-album-video-item iframe {
+        width: 250px;
+        height: 140px;
+    }
+
+    .video-item-container {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .album-video-item {
+        padding: 5px;
+    }
+
+    /* .album-photo-item {
+        width: 95%;
+    } */
+}
+
+@media screen and (max-width: 800px) {
+    .videoitem {
+        width: 100%;
+    }
+    .album-video-item iframe {
+        width: 350px;
+        height: 196px;
+    }
+
+    .us-album-video-item iframe {
+        width: 200px;
+        height: 135px;
+    }
+
+    .album-video-item {
+        padding: 3px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .videoitem {
+        width: 100%;
+    }
+    .album-video-item iframe {
+        width: 250px;
+        height: 140px;
+    }
+
+    .us-album-video-item iframe {
+        width: 230px;
+        height: 128px;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    /* .videoitem {
+        width: 100%;
+    } */
+    .album-video-item iframe {
+        width: 230px;
+        height: 128px;
+    }
+
+    .us-album-video-item iframe {
+        width: 230px;
+        height: 128px;
+    }
+}

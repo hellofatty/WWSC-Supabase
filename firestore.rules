@@ -1,16 +1,86 @@
+rules_version = '2';
+
 service cloud.firestore {
+  
   match /databases/{database}/documents {
-    match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.auth != null;
+     allow read,write:if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "Admin";
+    
+    match /users/{users} {
+       allow read,write:if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "Admin";
+     
+                 
+    }
+    
+    match /users/{id} {
+      
+       allow read,write:if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "Admin";
+      
+    }
+      
+      match /users/{id} {
+      
+      allow get,list,create: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "Admin";
+      allow update: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "Admin";
+      allow delete: if false;   
+      
+    }
+    
+    match /users/{document=**}  {
+      allow read,write:if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "Admin";
+      allow get,list: if isLoggedIn() ;
+      allow create,update, delete: if isLoggedIn();
+      
+    }
+    
+      match /users/{id}/games/{games}  {
+      allow get,list: if isLoggedIn() ;
+      allow create,update, delete: if isLoggedIn() && request.auth.uid == resource.data.uid;
+      
+      
+    }
+    
+      match /users/{id}/records/{records}  {
+      allow get,list: if isLoggedIn() ;
+      allow create,update, delete: if isLoggedIn() && belongsTo(id);
+      
+      
+    }
+    
+         match /users/{id}/class/{class}  {
+      allow get,list: if isLoggedIn() ;
+      allow create,update, delete: if isLoggedIn() && belongsTo(id);
+      
+      
+    }
+    
+      match /organizations/{organizations} {
+      allow read: if true;
+      allow read,write: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "Admin";
+    }
+    
+      match /events/{events} {
+      allow read: if true;
+      allow read,write: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "Admin";
+    }
+    
+    
+    match /notices/{notices} {
+      allow read: if true;
+      allow read,write: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "Admin";
     }
   }
 }
+
+
+
+
+function isLoggedIn(){
+ return request.auth !=null;
+}
+
+function belongsTo(id) {
+    return request.auth.uid == id
+}
+
+
+

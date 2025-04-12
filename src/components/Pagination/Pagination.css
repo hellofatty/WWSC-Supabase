@@ -1,0 +1,95 @@
+/** @format */
+
+.pagination-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* margin-top: 6px; */
+    padding: 12px;
+    /* margin: auto; */
+    width: 100%;
+}
+
+.pagination-info-text{
+font-size: 0.8rem;
+color: grey;
+/* margin-left: 90px; */
+
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.arrowPrevious {
+    color: "lightgrey";
+}
+
+/* .wwsc-select:focus {
+    outline: none;
+} */
+
+.wwsc-select:focus {
+    outline: none;
+    border: 1px solid lightgrey;
+}
+
+.pagination {
+    display: flex;
+    /* flex-wrap: wrap; */
+    justify-content: center;
+    margin-top: 15px;
+    gap: 4px;
+    margin-bottom: 20px;
+}
+
+.pagination__disable {
+    opacity: 0;
+}
+
+.pagination span {
+    width: 25px;
+    height: 25px;
+   padding-top: 2px;
+    font-size: 12px;
+    margin: 0 auto;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+    color: #0f597c;
+    /* border-color: teal; */
+    text-align: center;
+    border: 1px solid #0f597c;
+}
+
+.pagination span:hover {
+   
+    /* border-color: #0f597c; */
+    text-align: center; 
+    backdrop-filter: blur(20px);
+    border: 3px outset #9ac6db;
+    
+    
+}
+
+.pagination span.active {
+    /* font-weight: 900; */
+    /* border-color: rgb(192, 231, 231); */
+    background: #0f597c;
+    color: white;
+}
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media screen and (max-width: 600px) {
+    .pagination-info {
+        
+        padding: 6px;
+        /* margin: auto; */
+        flex-direction: column;
+        width: 80%;
+    }
+}

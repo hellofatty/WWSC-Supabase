@@ -6,13 +6,27 @@
 
 .w3-table th {
     padding: 0, 20px;
-    font-size: 1.45rem;
+    font-size: 0.9rem;
     text-align: center;
     color: teal;
 }
 
 .w3-table tr {
     padding: 30px;
+    font-size: 0.9rem;
+    color: teal;
+}
+
+.w3-table tr a{
+    /* padding: 30px; */
+    font-size: 0.9rem;
+    color: teal;
+}
+
+.w3-table tr a:hover{
+    /* padding: 30px; */
+    text-decoration: underline;
+    color: tomato;
 }
 
 tr:nth-child(odd) {
@@ -21,13 +35,13 @@ tr:nth-child(odd) {
 
 .w3-table td {
     /* vertical-align: center; */
-    font-size: 1.25rem;
+    font-size: 0.9rem;
 }
 .w3-table td:first-child {
-    font-size: 1.45rem;
+    font-size: 0.9rem;
     font-weight: 600;
     max-width: fit-content;
-    color: #d45b39;
+    color: tomato;
     width: 220px;
     white-space: nowrap;
     padding-right: 20px;
@@ -38,3 +52,64 @@ tr:nth-child(odd) {
 .w3-container p .no-ident {
     text-indent: 0;
 }
+
+@media screen and (max-width: 992px) {
+   
+    .w3-table table {
+        width: 100%;
+    }
+    
+    .w3-table th {
+        padding: 0, 10px;
+        font-size: 0.8rem;
+        text-align: center;
+        color: teal;
+    }
+    
+    .w3-table tr {
+        padding: 20px;
+        font-size: 0.8rem;
+        color: teal;
+    }
+
+
+    .w3-table td:first-child {
+        font-size: 0.8rem;
+        font-weight: 500;
+        max-width: fit-content;
+        color: tomato;
+        width: 180px;
+        white-space: nowrap;
+        padding-right: 15px;
+        vertical-align: center;
+        text-align: center;
+    }
+    .w3-table td {
+        /* vertical-align: center; */
+        font-size: 0.8rem;
+    }
+
+}
+
+@media screen and (max-width: 600px) {
+   
+    
+
+    .w3-table td:first-child {
+        font-size: 0.8rem;
+        font-weight: 500;
+        max-width: fit-content;
+        color: tomato;
+        width: 100px;
+        white-space: nowrap;
+        padding-right: 6px;
+        vertical-align: center;
+        text-align: center;
+    }
+    .w3-table td {
+        /* vertical-align: center; */
+        font-size: 0.75rem;
+    }
+
+}
+

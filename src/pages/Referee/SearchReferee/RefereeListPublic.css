@@ -1,0 +1,104 @@
+/** @format */
+
+.searchbar-text {
+    font-size: 0.8rem;
+    text-indent: 0;
+    text-align: left;
+    color: teal;
+}
+
+.searchbar-public {
+    margin: 0 auto;
+    margin-top: 20px;
+    width: 675px;
+    border-radius: 30px;
+    border: 1px solid #dcdcdc;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    transition: width 1s, height 1s ease-in-out;
+}
+
+.searchbar-public:hover {
+    box-shadow: 1px 1px 8px 1px #dcdcdc;
+}
+.searchbar-public:focus-within {
+    box-shadow: 1px 1px 8px 1px #dcdcdc;
+    outline: none;
+}
+
+.searchIcon-public {
+    font-size: 20px !important;
+    margin-right: 6px;
+    margin-left: 20px;
+    color: grey;
+}
+
+.searchInput-public {
+    height: 40px;
+    border: none;
+    width: 550px;
+    font-size: 0.8rem;
+    outline: none;
+    padding-left: 6px;
+    text-align: left;
+}
+
+.searchInput:focus {
+    outline: none;
+}
+
+@media screen and (max-width: 1024px) {
+
+    
+    .searchbar-public {
+        width: 525px;
+    }
+
+    .searchInput-public {
+        width: 360px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .searchbar-text {
+        font-size: 0.75rem;
+    }
+    
+    .searchbar-public {
+        width: 375px;
+    }
+
+    .searchInput-public {
+        width: 180px;
+        font-size: 0.75rem;
+        height: 38px;
+        color: teal;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    
+  
+    
+    .searchbar-public {
+        width: 275px;
+    }
+
+    .searchInput-public {
+        width: 150px;
+      
+    }
+}
+
+@media screen and (max-width: 320px) {
+ 
+    .searchbar-public {
+        width: 200px;
+    }
+
+    .searchInput-public {
+        width: 100px;
+       
+    }
+}

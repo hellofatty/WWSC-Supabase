@@ -1,0 +1,14 @@
+/** @format */
+
+.login-signup-form-container{
+
+    width: 100%;
+    margin-left: 0;
+}
+
+.login-signup-form-content{
+margin: auto;
+    width: 100%;
+    /* margin-left: 20px;
+    margin-left: 20px; */
+}

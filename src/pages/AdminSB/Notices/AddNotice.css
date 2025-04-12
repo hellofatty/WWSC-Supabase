@@ -1,0 +1,73 @@
+/** @format */
+
+.train-container {
+    padding-top: 1vw;
+    padding-bottom: 2vw;
+    overflow: auto;
+}
+
+.train-content h2 {
+    font-size: 2.5rem;
+}
+
+.train-content {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: flex-start;
+    margin: auto;
+padding-left: 80px;
+    width: 100%;
+
+}
+
+.train-content input {
+ 
+    width: 100%;
+
+}
+
+.train-input {
+    font-size: 16px;
+    color: grey;
+    margin-top: 0.75vw;
+    margin-bottom: 0.75vw;
+    width: 100%;
+    text-align: left;
+}
+
+.location-input span {
+    font-size: 16px;
+    text-align: left;
+    color: grey;
+}
+
+.location-input label {
+    font-size: 16px;
+}
+
+.train-content label input,
+.train-content label select {
+    width: 50%;
+}
+
+.train-content label select {
+    text-align: center;
+}
+
+.form-button {
+    display: flex;
+
+    justify-content: flex-end;
+    margin-right: 15%;
+}
+
+.form-button button {
+    font-size: 14px;
+    padding: 8px 2px;
+    margin-left: 0;
+    margin-right: 2.5vw;
+    width: 120px;
+
+    border-width: 0.1rem;
+}

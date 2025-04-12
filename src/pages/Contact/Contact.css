@@ -2,19 +2,93 @@
 
 .image-caption {
     position: absolute;
-    padding-top: 15px;
-    padding-left: 25px; 
+    padding-top: 7px;
+    padding-left: 25px;
     width: 100%;
-    height: 55px;
+    height: 35px;
     background: rgba(0, 0, 0, 0.55);
     color: white;
-    text-align: left; 
+    text-align: right;
     bottom: 0;
-    left:0;
-    font-size: 17px;
+    left: 0;
+    font-size: 0.9rem;
+    
 }
 
+.contact-subtitle {
+    font-size: 1rem;
+}
 
 .contact-info {
-    padding-left: 16px;
+    padding-left: 0.9rem;
+}
+
+.contact-info .address-item {
+    font-size: 0.9rem;
+   margin-bottom: 10px;
+    color: teal;
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 600px;
+}
+
+.contact-map {
+    padding: 5px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: 1px solid lightgrey;
+    width: fit-content;
+}
+
+.contact-map iframe{
+    width: 480px;
+    height:320px
+}
+
+@media screen and (max-width: 992px) {
+    .image-caption {
+        position: absolute;
+        padding-top: 3px;
+        padding-left: 20px;
+        width: 100%;
+        height: 25px;
+        background: rgba(0, 0, 0, 0.55);
+        color: white;
+        text-align: right;
+        bottom: 0;
+        left: 0;
+        font-size: 0.7rem;
+    }
+
+    /* .contact-info > p {
+        font-size: 0.8rem;
+        line-height: 1rem;
+    } */
+
+    .contact-map iframe{
+        width: 340px;
+        height: 240px;
+       
+    }
+
+    .contact-info .address-item {
+    
+        width: 300px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+  
+   
+    .contact-map iframe{
+        width: 270px;
+        height: 189px;
+       
+    }
+
+    .contact-info .address-item {
+    
+        width: 260px;
+    }
 }

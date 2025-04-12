@@ -1,0 +1,30 @@
+.referee-home {
+    display: flex; 
+    justify-content: flex-start;
+    align-items: top;
+}
+
+.referee-card {
+   
+    transition: 2s ease-in-out;
+    
+}
+
+.referee-content {
+   width: "100%";
+   transition: 2s ease-in-out;
+    
+} 
+
+
+@media screen and (max-width: 992px) {
+    /* .referee-home {
+        
+        flex-direction: column;
+     
+    } */
+    /* .referee-card {
+        width: 0%;
+        display: none;
+    }*/
+}

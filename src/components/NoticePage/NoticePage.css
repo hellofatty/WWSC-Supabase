@@ -1,21 +1,81 @@
+.notice-page img{
+
+    width: 100px;
+    height: fit-content;
+    margin-bottom: 20px;
+}
+
 .notice-page h3 > strong {
-    font-size: 2rem;
-    padding-bottom: 5rem;
-  
-    line-height: 5rem;
+    margin-top: 12px;
+    font-size: 1.6rem;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    line-height: 1.1rem;
     font-weight: normal;
   }
 
+  .notice-page h4 {
+    font-size: 1.1rem;
+    text-decoration: none;
+    color: teal;
+    /* padding-bottom: 2rem;
+    line-height: 1.5rem;
+    font-weight: normal; */
+  }
+
 .notice-page p {
-    font-size: 1.5rem;
+    font-size: 1rem;
 }
   
 .notice-page table a {
-    font-size: 1.25rem;
+    font-size: 0.9rem;
     margin-left: 1rem;
   }
 
 .notice-page table img {
-    width: 2.5rem;
-    height: auto;
+    width: 30px;
+    /* height: auto; */
   }
+
+  .notice_table table {
+    width: 50%;
+    margin: 0 auto;
+}
+
+.notice_table th {
+    padding: 0, 20px;
+    font-size: 1rem;
+    text-align: center;
+    color: teal;
+}
+
+.notice_table tr {
+    padding: 30px;
+    color: teal;
+    text-align: center;
+}
+
+/* tr:nth-child(odd) {
+    background-color: #f6fff7;
+} */
+
+.notice_table td {
+    /* vertical-align: center; */
+    font-size: 1rem;
+}
+
+.notice_table td:first-child {
+    font-size: 1rem;
+    font-weight: 600;
+    max-width: fit-content;
+    color: #d45b39;
+    width: 220px;
+    white-space: nowrap;
+    padding-right: 20px;
+    vertical-align: center;
+    text-align: center;
+}
+
+/* .w3-container p .no-ident {
+    text-indent: 0;
+} */

@@ -1,3 +1,26 @@
-.pdf {
-    text-indent: 3rem;
+/** @format */
+
+.sheet-content ul li::marker {
+    color: teal;
+}
+
+.sheet-content ul{
+
+    font-size: 0.9rem;
+    list-style: disc;
+}
+
+.sheet-content li{
+
+    margin-bottom: 12px;
+}
+
+@media screen and (max-width: 780px) {
+    .sheet-content ul{
+
+        font-size: 0.8rem;
+        list-style: disc;
+    }
+   
+    
 }

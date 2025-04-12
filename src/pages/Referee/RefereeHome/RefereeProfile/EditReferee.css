@@ -1,0 +1,86 @@
+/** @format */
+
+.modal-form-container-edit-profile-container{
+
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: flex-start;
+    /* padding: 20px; */
+    padding-bottom: 20px;
+
+}
+
+.modal-form-container-container{
+
+    display: flex;
+    justify-content: center;
+ 
+    align-items: flex-start;
+    /* padding: 20px; */
+    padding-bottom: 20px;
+
+}
+
+.upLoadPhoto-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    margin-right: 20px;
+}
+.photo-avatar img {
+
+    border-radius: 3px;
+    object-fit: cover;
+    width: 100px;
+    height: 126px;
+    box-shadow: 6px 6px 10px 0px rgba(0, 0, 0, 0.05);
+    margin-bottom: 10px;
+    border: 1px solid lightgray;
+    padding: 6px;
+}
+
+.upLoadPhotoBtn-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+
+}
+
+.modal-form-input-container{
+    margin-top: 10px;
+    margin-bottom: 40px;
+}
+
+.modal-form-input-label{
+    font-size: 0.8rem;
+    text-wrap: nowrap; 
+    color: grey;
+    margin-left: 2px;
+}
+
+.modal-form-input-text{
+    font-size: 0.85rem;
+    color: teal;
+}
+
+.modal-form-action-buttons{
+    margin: auto;
+    font-size: 0.85rem;
+}
+
+.modal-form-select-option-item{
+    color:teal
+}
+
+#country-select input{
+    font-size: 0.85rem;
+    color: teal;
+    padding: 0;
+    height:12px
+}

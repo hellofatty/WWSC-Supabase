@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 import './TextDrop.css';
 
@@ -17,7 +19,8 @@ export default function TextDrop({title, text}) {
     return (
         <div className='text-drop'>
             <button onClick={toggle} style={dropdownStyle} >
-                {dropdownOpen ? '\u25B2' : '\u25BC'} {title} 
+                {dropdownOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />} &nbsp; {title}
+                {/* {dropdownOpen ? '\u25B2' : '\u25BC'} &nbsp; {title}  */}
             </button>
             {dropdownOpen && 
                 text

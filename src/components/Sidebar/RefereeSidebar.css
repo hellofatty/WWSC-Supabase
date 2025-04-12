@@ -1,0 +1,235 @@
+/** @format */
+
+/* .sidebar {
+    width: 250px;
+    min-width: 300px;
+    left: 0;
+    margin-right: 10px;
+    background: var(--primary-color);
+    min-height: 43.5vw;
+    box-sizing: border-box;
+    position: relative;
+    box-shadow: 4px 0px 4px 0px rgba(0, 0, 0, 0.25);
+} */
+
+.menu-open-switch-container {
+    color: rgba(211, 211, 211, 0.257);
+    display: flex;
+    justify-content: flex-end;
+    /* margin-right: 10px; */
+    /* margin-top: 10px; */
+    transition: 2s ease-in-out;
+}
+
+.menu-close-switch-container {
+   color: rgba(211, 211, 211, 0.257);
+
+    display: flex;
+    justify-content: center;
+    /* margin-right: 10px; */
+    /* margin-top: 10px; */
+    transition: 2s ease-in-out;
+}
+.menu-open-switch-icon {
+    color: grey;
+
+    cursor: pointer;
+    transition: 2s ease-in-out;
+}
+
+.sidebar-open-referee-icon {
+    margin-top: 10px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid lightgrey;
+}
+
+.sidebar-open-referee-icon img {
+    width: 90px;
+    height: 87px;
+    transition: 2s ease-in-out;
+}
+
+.sidebar-close-referee-icon {
+    margin-top: 10px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid lightgrey;
+}
+
+.sidebar-close-referee-icon img {
+    width: 55px;
+    height: 50px;
+}
+
+.sidebar-menu-icon {
+    color: teal;
+    font-size: 1.1rem;
+}
+
+.sidebar-submenu-label {
+    color: tomato;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-bottom: 1px solid lightgrey;
+    padding-left: 6px; 
+}
+
+.sidebar-menu-label {
+    color: teal;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.sidebar-submenu-menu-label {
+    color: teal;
+    font-size: 0.85rem;
+    /* font-weight: 600; */
+}
+
+.sidebar-menu-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sidebar-content {
+    min-height: 40vw;
+
+    padding-top: 1vw;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+.sidebar-logo {
+    width: 40%;
+}
+
+.user img {
+    width: 105px;
+    height: 110px;
+    border-radius: 50%;
+    border: rgb(207, 207, 207) solid;
+}
+
+.sidebar .user {
+    font-size: 1.5rem;
+    text-align: center;
+    letter-spacing: 1px;
+    padding: 40px 30px;
+
+    width: 100%;
+
+    border-bottom: 2px solid rgba(160, 160, 160, 0.4);
+}
+.sidebar ul {
+    padding-left: 0;
+}
+.sidebar .links {
+    margin-top: 6px;
+}
+.sidebar .links li {
+    margin-top: 6px;
+    list-style: none;
+    font-size: 16px;
+    font-weight: 600;
+}
+.sidebar .links a {
+    display: flex;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding: 20px;
+    margin-left: 30px;
+
+    width: 271px;
+
+    text-decoration: none;
+
+    color: teal;
+    box-sizing: border-box;
+}
+.sidebar .links img {
+    margin-right: 12px;
+    width: 30px;
+    color: black;
+}
+.sidebar .links a.active {
+    background: rgb(228, 227, 227);
+    border-radius: 20px 0 0 20px;
+    color: teal;
+}
+.sidebar .links .active img {
+    filter: invert(40%);
+}
+
+/* aatar in sidebar */
+.sidebar .user .avatar {
+    margin-bottom: 10px;
+    width: 70px;
+    height: 70px;
+    border: 3px solid #fff;
+}
+
+.referee-link {
+    padding: 10px 20px 10px 20px;
+    margin-top: 20px;
+    width: 100%;
+
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+
+    border-radius: 0.25vw;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
+.referee-link:hover {
+    color: white;
+    background: #0e6361;
+}
+
+.log-button-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    min-height: 35vw;
+}
+
+.log-button-container img {
+    width: 10%;
+}
+
+.logout-button-container {
+    position: relative;
+    bottom: 0;
+}
+
+.logout-btn {
+    display: flex;
+    flex-direction: column;
+
+    /* margin-bottom: 2vw; */
+}
+
+.logout-btn button {
+    background: teal;
+    border: none;
+}
+
+.logout-btn button img {
+    margin-right: 12px;
+}
+
+@media screen and (max-width: 900px) {
+    
+
+    
+}
+

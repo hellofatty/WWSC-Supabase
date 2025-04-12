@@ -1,0 +1,104 @@
+/** @format */
+
+.landing-slides > .slide {
+    border: 1px solid lightgrey;
+    border-radius: 5px;
+    padding: 0;
+}
+
+li .carousel .thumb.selected {
+    border: 1px solid lightgrey;
+}
+
+li .carousel .thumb:hover {
+    border: 1px solid lightgrey;
+}
+
+.carousel .control-dots {
+    background-color: rgba(0, 0, 0, 0.771);
+    height: fit-content;
+    /* padding: 20px; */
+}
+
+.home-section {
+    padding: 10px;
+    padding-top: 10px;
+    border-radius: 5px;
+    /* width: 80%; */
+    /* margin: 0, auto; */
+}
+
+.home-about-wwsc-text {
+    font-size: 0.9rem;
+    padding-left: 20px;
+    padding-right: 20px;
+    line-height: 1.9rem;
+    text-align: justify;
+}
+
+.home-about-wwsc-quote {
+    font-size: 1.1rem;
+    padding: 10px 10px;
+    text-align: center;
+    border-left: 10px solid tomato;
+    width: 80%;
+    margin: auto;
+    border-radius: 5px;
+    background-color: rgba(211, 211, 211, 0.725);
+    font-family: "Gelasio", serif;
+    color: rgb(101, 101, 101);
+}
+
+.home-about-wwsc-quote-small {
+    font-size: 0.9rem;
+    padding: 6px 6px;
+    text-align: center;
+    border-left: 10px solid tomato;
+    width: 80%;
+    margin: auto;
+    border-radius: 5px;
+    background-color: rgba(211, 211, 211, 0.725);
+    font-family: "Gelasio", serif;
+    color: rgb(101, 101, 101);
+}
+
+.home-box-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: auto;
+
+    padding: 20px;
+    /* transition: all 2s ease-in-out; */
+}
+
+
+/* @media screen and (max-width: 750px) { */
+    /* .home-box-container {
+        width: 100%;
+        
+        align-items: center;
+        gap: 12px; 
+        justify-content: center;
+        flex-wrap: nowrap;
+        /* margin: auto; */
+        /* flex-direction: column; */
+        /* padding: 20px; */
+    /* } */ 
+
+    /* .home-about-wwsc-quote {
+        font-size: 1.1rem;
+        padding: 15px 12px;
+        text-align: center;
+        border-left: 10px solid tomato;
+        width: 80%;
+        margin: auto;
+        border-radius: 5px;
+        background-color: rgba(211, 211, 211, 0.725);
+        font-family: "Gelasio", serif;
+        color: rgb(101, 101, 101);
+    } */
+/* } */

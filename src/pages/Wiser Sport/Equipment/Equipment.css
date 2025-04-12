@@ -1,3 +1,26 @@
 /** @format */
 
 
+.equip-content{
+
+display: flex;
+flex-direction: column;
+
+
+}
+
+.equip-content img{
+    width: 60%;
+}
+
+.equip-content small{
+    color: teal;
+}
+
+
+@media screen and (max-width: 992px) {
+    .equip-content img{
+        width: 100%;
+    }
+    
+}

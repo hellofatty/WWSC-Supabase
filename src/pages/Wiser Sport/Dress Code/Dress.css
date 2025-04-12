@@ -13,23 +13,25 @@
     /* width: 200px; */
     /* height: 540px;  */
     object-fit: cover;
+    overflow: hidden;
 }
 
 .image-caption {
     position: absolute;
-    padding-top: 15px;
-    padding-right: 25px;
+    padding-top: 6px;
+    /* padding-right: 15px; */
     /* width: 82%; */
-    height: 55px;
+    height: 30px;
     background: rgba(0, 0, 0, 0.55);
     color: white;
-    text-align: right;
+    text-align: center;
     bottom: 0;
     left: 0;
-    font-size: 17px;
+    font-size: 0.8rem;
+    margin: 0, auto;
 }
 
-.img-slides{
+.img-slides {
     display: flex;
     justify-content: center;
 }
@@ -38,23 +40,35 @@
 .carousel {
     display: flex;
     flex-direction: column;
-    /* justify-content: space-between; */
+    justify-content: center;
     background-color: transparent;
     align-items: center;
-    /* text-align: center; */
+    text-align: center;
+    overflow: hidden;
+    height: auto;
 }
 
 /* .carousel{
     margin-top: 20px;
 } */
+/* .carousel .slide{
+    width: 80%;
+    overflow: hidden;
+}
+.carousel .slide img{
+    width: 80%;
+ }  */
 
 .slide {
-    border: 1px solid grey;
-    border-radius: 5px;
-    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-    padding: 10px;
+    /* border: 1px solid grey; */
+    /* border-radius: 15px; */
+    /* box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25); */
+    padding: 3px;
     /* margin-bottom: 30px; */
-    background-color: #fefefe;
+    /* background-color: rgb(44, 44, 44); */
+    /* width: 80%; */
+    /* min-width: 0; */
+    overflow: hidden;
 }
 
 .img-slide-item {
@@ -62,6 +76,7 @@
     border-radius: 5px;
     /* box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25); */
     padding: 5px;
+    overflow: hidden;
 }
 
 li .carousel .thumb.selected {
@@ -74,6 +89,21 @@ li .carousel .thumb:hover {
 
 .carousel .control-dots {
     background-color: rgba(0, 0, 0, 0.771);
-    height: fit-content;
+    height: auto;
     /* padding: 20px; */
+}
+
+@media screen and (max-width: 992px) {
+    .image-caption {
+        position: absolute;
+        padding-top: 6px;
+        padding-bottom: 6px;
+        font-size: 0.8rem;
+    }
+}
+
+@media screen and (max-width: 992px) {
+    .image-caption {
+        font-size: 0.75rem;
+    }
 }

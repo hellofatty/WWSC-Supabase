@@ -1,0 +1,19 @@
+/** @format */
+.modal-form-input-file {
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 1rem;
+}
+
+.logo-preview {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+}
+
+.logo-preview img {
+    object-fit: contain;
+}

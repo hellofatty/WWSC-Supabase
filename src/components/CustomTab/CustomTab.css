@@ -1,7 +1,7 @@
 /** @format */
 
 .custom-tab {
-    padding: 2vw 3vw 2vw 0;
+    padding: 2vw 3vw;
     /* border: 1px solid teal; */
     /* border-radius: 0.5vw; */
 }
@@ -16,7 +16,7 @@
 .nav-tabs .nav-link {
     color: grey;
     cursor: pointer;
-    font-size: (1.25rem, 1.117rem + 0.4255vw, 1.5rem);
+    font-size: 0.75rem;
     border: 1px solid rgba(211, 211, 211, 0.882);
     margin-right: 3px;
     margin-bottom: 0;
@@ -36,9 +36,27 @@ li .nav-item {
     -webkit-tap-highlight-color: transparent;
 }
 
+.custom-tab-nav-item{
+    font-size: 0.75rem;
+    padding-left: 10px;
+    padding-right: 15px;
+    text-align: center;
+}
+
+a.nav-link{
+
+    text-align: center;
+}
+
 li .nav-item a:hover {
     background-color: white;
     color: lightseagreen;
+}
+
+.nav-tabs .nav-link:hover {
+    /* background-color: white; */
+    color: grey;
+    /* font-weight: 600; */
 }
 
 .nav-tabs .nav-link.active {
@@ -50,14 +68,30 @@ li .nav-item a:hover {
     top: 15px;
     font-weight: 600;
     -webkit-tap-highlight-color: transparent;
+    font-size: 0.75rem;
 }
 
 .tab-content {
-    padding: 40px 80px;
+    padding: 1.5vw 3vw 1.5vw 3vw;
 
     border: 1px solid rgba(211, 211, 211, 0.882);
     border-top: 0;
     border-radius: 0px 0px 5px 5px;
 
     margin-top: 0;
+}
+
+@media screen and (max-width: 992px) {
+   
+    a.nav-link{
+    font-size: 0.65rem;
+        text-align: center;
+    }
+
+    
+    .tab-content {
+        padding: 2vw 6vw;
+    
+ 
+    }
 }
