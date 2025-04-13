@@ -10,19 +10,29 @@ import { toast } from "react-toastify";
 
 import { useFirestore } from "../../../../hooks/useFirestore";
 
+
+// import { arrayUnion } from "firebase/firestore";
+
 import { useTranslation } from "react-i18next";
-import RefereeGameeDropzone from "../../../../components/Dropzone/RefereeGameDropzone";
+import TrainingClassDropzone from "../../../../components/Dropzone/TrainingClassDropzone";
 import { useLocation, useNavigate } from "react-router-dom";
 
-export default function UploadRefereeGameFiles({ record, toggle, uid, referee }) {
+
+export default function UploadTrainingClassFiles({ record, toggle, uid, referee }) {
     const { t, i18n } = useTranslation("global");
-      const navigate = useNavigate();
-        const location = useLocation();
+    // const lang = i18n.language;
+     const navigate = useNavigate();
+              const location = useLocation();
+
+    // console.log(record.id);
+    // console.log(uid);
 
     const [uploadFiles, setUploadFiles] = useState([]);
     const [fileURL, setFileURL] = useState([]);
 
-    const { updateDocument, response } = useFirestore(`users/${uid}/games`);
+    // const [org, setOrg] = useState(event.org.label);
+
+    const { updateDocument, response } = useFirestore(`users/${uid}/class`);
 
     const showToastMessage = () => {
         toast.success(i18n.t("general.update-record-success-message"));
@@ -34,23 +44,24 @@ export default function UploadRefereeGameFiles({ record, toggle, uid, referee })
         e.preventDefault();
 
         await updateDocument(record.id, {
-            fileURLs: record.fileURLs ? record.fileURLs.concat(fileURL) : fileURL,
+            fileURLs: record.fileURLs?record.fileURLs.concat(fileURL):fileURL
         });
 
         if (!response.error) {
-            setFileURL([]);
-        }
+            setFileURL([])
+          }
         showToastMessage();
         navigate(location.pathname); // Navigate to the current path
         toggle();
     };
+
 
     return (
         <div className="referee-home">
             <div className="container train-container">
                 <div className="training">
                     <Form onSubmit={handleUpdate}>
-                        <RefereeGameeDropzone
+                        <TrainingClassDropzone
                             uploadFiles={uploadFiles}
                             setUploadFiles={setUploadFiles}
                             fileURL={fileURL}

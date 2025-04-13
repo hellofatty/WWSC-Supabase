@@ -33,3 +33,6 @@ const { data, error } = await supabase
         )
     `)
     .order('created_at', { ascending: false });
+
+    # Deploy with build directory
+netlify deploy --prod --dir=build

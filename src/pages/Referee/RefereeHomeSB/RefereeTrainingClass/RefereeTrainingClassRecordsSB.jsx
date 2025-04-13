@@ -2,9 +2,9 @@
 
 // import "./RefereeTrainingRecords.css";
 
-import RefereeLayout from "../RefereeLayout/RefereeLayout";
-import TrainingClassRecordsList from "./TrainingClassRecordsList";
+import RefereeLayoutSB from "../RefereeLayout/RefereeLayoutSB";
+import TrainingClassRecordsListSB from "./TrainingClassRecordsList";
 
-export default function RefereeTrainingClass({ uid }) {
-    return <RefereeLayout uid={uid} children={<TrainingClassRecordsList uid={uid} />} />;
+export default function RefereeTrainingClassSB({ uid }) {
+    return <RefereeLayoutSB uid={uid} children={<TrainingClassRecordsListSB uid={uid} />} />;
 }

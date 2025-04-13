@@ -65,6 +65,7 @@
         "web-vitals": "^2.1.4",
         "youku-embed-video": "^1.1.93"
     },
+    "homepage": ".",
     "scripts": {
         "start": "react-scripts start",
         "build": "react-scripts build",
