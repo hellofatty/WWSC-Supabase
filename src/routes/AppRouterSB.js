@@ -1,7 +1,6 @@
 /** @format */
 
 import { Route, Routes, Navigate } from "react-router-dom";
-// import { useAuthContext } from "../hooks/useAuthContext";
 
 // Import your components here
 import Home from "../pages/Home/Home";
@@ -66,7 +65,7 @@ import { ErrorBoundary } from "react-error-boundary";
 
 import { useAuthContextSB } from "../hooks/useAuthContextSB";
 import { supabase } from "../supabase/supabaseClient";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 
 
@@ -76,42 +75,100 @@ export const AppRouterSB = () => {
     const [notices, setNotices] = useState(null);
     const [noticeError, setNoticeError] = useState(null);
     const [referee, setReferee] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // Get notices from Supabase
-                const { data: noticesData, error: noticesError } = await supabase
-                    .from("notices")
+    const fetchData = useCallback(async () => {
+        try {
+            setLoading(true);
+            // Get notices from Supabase
+            const { data: noticesData, error: noticesError } = await supabase
+                .from("notices")
+                .select("*")
+                .eq("author", "WWSC")
+                .order("posted_date", { ascending: false });
+
+            if (noticesError) throw noticesError;
+            setNotices(noticesData);
+
+            // Get referee data if user is authenticated
+            if (user?.id) {
+                const { data: refereeData, error: refereeError } = await supabase
+                    .from("referees")
                     .select("*")
-                    .eq("author", "WWSC")
-                    .order("posted_date", { ascending: false });
+                    .eq("id", user.id)
+                    .single();
 
-                if (noticesError) throw noticesError;
-                setNotices(noticesData);
+                if (refereeError) throw refereeError;
+                setReferee(refereeData);
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            setNoticeError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    }, [user?.id]);
 
-                // Get referee data if user is authenticated
-                if (user?.id) {
-                    const { data: refereeData, error: refereeError } = await supabase
-                        .from("referees")
-                        .select("*")
-                        .eq("id", user.id)
-                        .single();
+    // Initial data fetch
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
-                    if (refereeError) throw refereeError;
-                    setReferee(refereeData);
+    // Set up realtime subscriptions
+    useEffect(() => {
+        // Subscribe to notices table changes
+        const noticesSubscription = supabase
+            .channel('router-notices')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'notices',
+                    filter: 'author=eq.WWSC'
+                },
+                (payload) => {
+                    console.log('Notice change received:', payload);
+                    fetchData();
                 }
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                setNoticeError(error.message);
+            )
+            .subscribe();
+
+        // Subscribe to referee changes if user is authenticated
+        let refereeSubscription;
+        if (user?.id) {
+            refereeSubscription = supabase
+                .channel('router-referee')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: '*',
+                        schema: 'public',
+                        table: 'referees',
+                        filter: `id=eq.${user.id}`
+                    },
+                    (payload) => {
+                        console.log('Referee change received:', payload);
+                        fetchData();
+                    }
+                )
+                .subscribe();
+        }
+
+        // Cleanup subscriptions
+        return () => {
+            supabase.removeChannel(noticesSubscription);
+            if (refereeSubscription) {
+                supabase.removeChannel(refereeSubscription);
             }
         };
+    }, [user?.id, fetchData]);
 
-        fetchData();
-    }, [user?.id]); // Re-run when user ID changes
+    // Show loading state
+    if (loading) {
+        return <div className="loading">Loading...</div>;
+    }
 
-    // console.log(referee?.role);
-    // console.log(referee?.name);
     return (
         <ErrorBoundary
             fallback={<div>Something went wrong</div>}

@@ -1,6 +1,6 @@
 /** @format */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../../../supabase/supabaseClient";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -41,27 +41,55 @@ export default function NoticeListSB() {
     const [rowsPerPage, setRowsPerPage] = useState(5);
 
     // Fetch notices
-    useEffect(() => {
-        const fetchNotices = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from("notices")
-                    .select("*")
-                    .eq("author", "WWSC")
-                    .order("posted_date", { ascending: false });
+ // Wrap fetchNotices in useCallback
+ const fetchNotices = useCallback(async () => {
+    try {
+        setLoading(true);
+        const { data, error } = await supabase
+            .from("notices")
+            .select("*")
+            .eq("author", "WWSC")
+            .order("posted_date", { ascending: false });
 
-                if (error) throw error;
-                setNotices(data);
-            } catch (err) {
-                console.error("Error fetching notices:", err);
-                setError(err.message);
-            } finally {
-                setLoading(false);
+        if (error) throw error;
+        setNotices(data);
+    } catch (err) {
+        console.error("Error fetching notices:", err);
+        setError(err.message);
+    } finally {
+        setLoading(false);
+    }
+}, []);
+
+// Initial data fetch
+useEffect(() => {
+    fetchNotices();
+}, [fetchNotices]);
+
+// Set up realtime subscriptions
+useEffect(() => {
+    // Subscribe to notices table changes
+    const noticesSubscription = supabase
+        .channel('notices-changes')
+        .on(
+            'postgres_changes',
+            {
+                event: '*', // Listen to all changes
+                schema: 'public',
+                table: 'notices'
+            },
+            (payload) => {
+                console.log('Notice change received:', payload);
+                fetchNotices(); // Refresh data when changes occur
             }
-        };
+        )
+        .subscribe();
 
-        fetchNotices();
-    }, []);
+    // Cleanup subscription on unmount
+    return () => {
+        supabase.removeChannel(noticesSubscription);
+    };
+}, [fetchNotices]);
 
     // Delete notice
     const handleDelete = async (id) => {

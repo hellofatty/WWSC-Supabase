@@ -1,7 +1,7 @@
 /** @format */
 
 import "./ProfilePublic.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../../supabase/supabaseClient";
 import { useTranslation } from "react-i18next";
 import Chip from "@mui/joy/Chip";
@@ -11,40 +11,92 @@ export default function ProfilePublic({ referee }) {
     const { t, i18n } = useTranslation("global");
     const lang = i18n.language;
     const [organization, setOrganization] = useState(null);
+     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     console.log(referee);
 
     // Fetch organization data
-    useEffect(() => {
-        const fetchOrganization = async () => {
-            if (!referee.org_id) return;
+    const fetchOrganization = useCallback(async () => {
+        if (!referee.org_id) return;
 
-            try {
-                const { data, error } = await supabase
-                    .from("organizations")
-                    .select("id, name, name_tw, name_cn")
-                    .eq("id", referee.org_id)
-                    .single();
+        try {
+            setLoading(true);
+            const { data, error } = await supabase
+                .from("organizations")
+                .select("id, name, name_tw, name_cn")
+                .eq("id", referee.org_id)
+                .single();
 
-                if (error) throw error;
+            if (error) throw error;
 
-                setOrganization({
-                    value: {
-                        id: data.id,
-                        name: data.name,
-                        nameTw: data.name_tw,
-                        nameCn: data.name_cn,
-                    },
-                });
-            } catch (err) {
-                console.error("Error fetching organization:", err);
-                setError(err.message);
-            }
-        };
-
-        fetchOrganization();
+            setOrganization({
+                value: {
+                    id: data.id,
+                    name: data.name,
+                    nameTw: data.name_tw,
+                    nameCn: data.name_cn,
+                },
+            });
+        } catch (err) {
+            console.error("Error fetching organization:", err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
     }, [referee.org_id]);
+
+    // Initial data fetch
+    useEffect(() => {
+        fetchOrganization();
+    }, [fetchOrganization]);
+
+    // Set up realtime subscriptions
+    useEffect(() => {
+        if (!referee.org_id) return;
+
+        // Subscribe to organizations table changes
+        const orgsSubscription = supabase
+            .channel('public-profile-org')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'organizations',
+                    filter: `id=eq.${referee.org_id}`
+                },
+                (payload) => {
+                    console.log('Organization change received:', payload);
+                    fetchOrganization();
+                }
+            )
+            .subscribe();
+
+        // Subscribe to referees table changes
+        const refereesSubscription = supabase
+            .channel('public-profile-referee')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'referees',
+                    filter: `id=eq.${referee.id}`
+                },
+                (payload) => {
+                    console.log('Referee change received:', payload);
+                    // Handle referee updates if needed
+                }
+            )
+            .subscribe();
+
+        // Cleanup subscriptions
+        return () => {
+            supabase.removeChannel(orgsSubscription);
+            supabase.removeChannel(refereesSubscription);
+        };
+    }, [referee.org_id, referee.id, fetchOrganization]);
 
     // Update the organization display section
     const renderOrganization = () => {

@@ -6,14 +6,14 @@ import { useState } from "react";
 import { Button, Form } from "reactstrap";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
-import { useLocation, useNavigate } from "react-router-dom";
+// import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../../../../supabase/supabaseClient";
 import RefereeGameeDropzoneSB from "../../../../components/Dropzone/RefereeGameDropzoneSB";
 
 export default function UploadRefereeGameFilesSB({ record, toggle, uid, referee }) {
     const { t } = useTranslation("global");
-    const navigate = useNavigate();
-    const location = useLocation();
+    // const navigate = useNavigate();
+    // const location = useLocation();
     const [loading, setLoading] = useState(false);
     const [uploadFiles, setUploadFiles] = useState([]);
     const [fileURL, setFileURL] = useState([]);
@@ -58,7 +58,7 @@ export default function UploadRefereeGameFilesSB({ record, toggle, uid, referee 
 
             setFileURL([]);
             showToastMessage('success', 'general.update-record-success-message');
-            navigate(location.pathname);
+            // navigate(location.pathname);
             toggle();
         } catch (error) {
             console.error('Error updating files:', error);

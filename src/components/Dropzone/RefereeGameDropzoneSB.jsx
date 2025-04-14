@@ -9,6 +9,7 @@ import Button from "@mui/material/Button";
 import { toast } from "react-toastify";
 import moment from "moment";
 import "./Dropzone.css";
+import { CircularProgress } from "@mui/material";
 
 const baseStyle = {
     flex: 1,
@@ -178,7 +179,8 @@ export default function RefereeGameDropzoneSB({ uploadFiles, setUploadFiles, id,
                     )}
                 </div>
             </div>
-            <div className="preview-container">{selectedFiles}</div>
+            <div className="preview-container">{selectedFiles}            
+            </div>
             <div
                 style={{
                     display: "flex",
@@ -198,8 +200,8 @@ export default function RefereeGameDropzoneSB({ uploadFiles, setUploadFiles, id,
                 >
                     {loading ? (
                         <span>
-                            <i className="fas fa-spinner fa-spin me-2"></i>
-                            {t("common.uploading")}
+                               <CircularProgress size={20} color="inherit" />{" "}
+                            {t("general.loading")}
                         </span>
                     ) : (
                         <>2. {t("referee.record.upload")}</>

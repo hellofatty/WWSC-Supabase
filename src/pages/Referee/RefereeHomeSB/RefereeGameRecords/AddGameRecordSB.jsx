@@ -15,11 +15,11 @@ import CountryListTw from "../../../../components/CountryList/CountryListTw";
 import CountryListCn from "../../../../components/CountryList/CountryListCn";
 
 export default function AddGameRecordSB({ toggle, uid }) {
+    
     const { t, i18n } = useTranslation("global");
     const lang = i18n.language;
     const navigate = useNavigate();
     const location = useLocation();
-    // const { user } = useAuthContextSB();
     const [loading, setLoading] = useState(false);
 
     // Form states
@@ -68,7 +68,9 @@ export default function AddGameRecordSB({ toggle, uid }) {
         try {
             // const gameDate = new Date(date);
 
-            const { error } = await supabase.from("games").insert({
+            const { error } = await supabase
+                .from("games")
+                .insert({
                 user_id: uid,
                 org_id: org?.value,
                 date: moment(date).toISOString(),
@@ -198,10 +200,10 @@ export default function AddGameRecordSB({ toggle, uid }) {
                                         {t("referee.record.organization")}:
                                     </Label>
                                     <Select
-                                        placeholder={t("referee.record.select-org")}
+                                        placeholder={t("referee.record.select-org-label")}
                                         options={orgs}
                                         value={org}
-                                        onChange={setOrg}
+                                        onChange={(newValue) => setOrg(newValue)}
                                         getOptionLabel={(option) =>
                                             lang === "zh-TW"
                                                 ? option.labelTw

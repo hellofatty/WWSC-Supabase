@@ -60,7 +60,7 @@ function NoticeDetailSB() {
         return (
             <div className="loading-container">
                 <CircularProgress />
-                <p>{t("common.loading")}</p>
+                <p>{t("general.loading")}</p>
             </div>
         );
     }

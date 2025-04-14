@@ -2,13 +2,9 @@
 
 import "./TrainingClassRecordsList.css";
 
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
-
-// ==========Firebase======================
-import { useCollection } from "../../../../hooks/useCollection";
-import { useDocument } from "../../../../hooks/useDocument";
-import { useFirestore } from "../../../../hooks/useFirestore";
+import { supabase } from "../../../../supabase/supabaseClient";
 
 // ==========Reactstrap======================
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
@@ -27,7 +23,17 @@ import SchoolIcon from "@mui/icons-material/School";
 import EventIcon from "@mui/icons-material/Event";
 // import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
-import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, useMediaQuery } from "@mui/material";
+import {
+    CircularProgress,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    useMediaQuery,
+} from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 // import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 // import TableChartIcon from "@mui/icons-material/TableChart";
@@ -43,30 +49,169 @@ import moment from "moment";
 
 // ==========Import Components======================
 import Pagination from "../../../../components/Pagination/Pagination";
-import AddTrainingClassRecord from "./AddTrainingClassRecord";
-import EditTrainingClassRecord from "./EditTrainingClassRecord";
-import UploadTrainingClassFiles from "./UploadTrainingClassFiles";
-import DownloadTrainingClassFiles from "./DownloadTrainingClassFiles";
+import AddTrainingClassRecordSB from "./AddTrainingClassRecordSB";
+import EditTrainingClassRecordSB from "./EditTrainingClassRecordSB";
+import UploadTrainingClassFilesSB from "./UploadTrainingClassFilesSB";
+import DownloadTrainingClassFilesSB from "./DownloadTrainingClassFilesSB";
+import { toast } from "react-toastify";
 
 // ==========Create TrainingRecordsList component======================
-export default function TrainingClassRecordsList({ uid }) {
+export default function TrainingClassRecordsListSB({ uid }) {
     const { t, i18n } = useTranslation("global");
     const lang = i18n.language;
-
-    const { documents: trainingClassRecords } = useCollection(
-        `users/${uid}/class`,
-        ["uid", "==", uid],
-        ["date", "desc"]
-    );
-
     const isSmallScreen = useMediaQuery("(max-width:900px)");
 
-    // const { document: referee } = useDocument("users", uid);
+    const [trainingClassRecords, setTrainingClassRecords] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [query, setQuery] = useState("all");
+    const [currentRecord, setCurrentRecord] = useState(null);
 
-    const { deleteDocument } = useFirestore(`users/${uid}/class`);
+    const [referee, setReferee] = useState(null);
 
-    // const [toggle, setToggle] = useState(false);
-    // const [query, setQuery] = useState("");
+    // Wrap fetchData in useCallback
+    const fetchData = useCallback(async () => {
+        try {
+            setLoading(true);
+
+            // Fetch referee data
+            const { data: refereeData, error: refereeError } = await supabase
+                .from("referees")
+                .select()
+                .eq("id", uid)
+                .single();
+
+            if (refereeError) throw refereeError;
+            setReferee(refereeData);
+
+            // Fetch training class records with organizations
+            const { data: classData, error: classError } = await supabase
+                .from("class")
+                .select(
+                    `
+                *,
+                organizations:org_id (
+                    id,
+                    name,
+                    name_tw,
+                    name_cn,
+                    org_url,
+                    logo_url
+                )
+            `
+                )
+                .eq("user_id", uid)
+                .order("date", { ascending: false });
+
+            if (classError) throw classError;
+
+            const transformedData = classData.map((record) => ({
+                ...record,
+                org: {
+                    value: {
+                        id: record.organizations?.id,
+                        name: record.organizations?.name,
+                        nameTw: record.organizations?.name_tw,
+                        nameCn: record.organizations?.name_cn,
+                        orgURL: record.organizations?.org_url,
+                        logoURL: record.organizations?.logo_url,
+                    },
+                    label: record.organizations?.name,
+                },
+            }));
+
+            setTrainingClassRecords(transformedData);
+        } catch (err) {
+            console.error("Error fetching data:", err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    }, [uid]);
+
+    // Initial data fetch
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    // Set up realtime subscriptions
+    useEffect(() => {
+        // Subscribe to class table changes
+        const classSubscription = supabase
+            .channel("class-changes")
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "class",
+                    filter: `user_id=eq.${uid}`,
+                },
+                (payload) => {
+                    console.log("Class change received:", payload);
+                    fetchData();
+                }
+            )
+            .subscribe();
+
+        // Subscribe to organizations table changes
+        const orgsSubscription = supabase
+            .channel("orgs-changes")
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "organizations",
+                },
+                (payload) => {
+                    console.log("Organization change received:", payload);
+                    fetchData();
+                }
+            )
+            .subscribe();
+
+        // Subscribe to referees table changes
+        const refereesSubscription = supabase
+            .channel("referees-changes")
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "referees",
+                    filter: `id=eq.${uid}`,
+                },
+                (payload) => {
+                    console.log("Referee change received:", payload);
+                    fetchData();
+                }
+            )
+            .subscribe();
+
+        // Cleanup subscriptions
+        return () => {
+            supabase.removeChannel(classSubscription);
+            supabase.removeChannel(orgsSubscription);
+            supabase.removeChannel(refereesSubscription);
+        };
+    }, [uid, fetchData]);
+
+    // Handle delete
+    const handleDelete = async (id) => {
+        try {
+            setLoading(true);
+            const { error } = await supabase.from("class").delete().eq("id", id).eq("user_id", uid);
+
+            if (error) throw error;
+
+            setTrainingClassRecords((prev) => prev.filter((record) => record.id !== id));
+            toast.success(t("referee.class.delete-success-message"));
+        } catch (err) {
+            console.error("Error deleting record:", err);
+            toast.error(t("referee.class.delete-error-message"));
+        }
+    };
 
     // ------Open Add Modal-------
     const [modalAdd, setModalAdd] = useState(false);
@@ -78,7 +223,6 @@ export default function TrainingClassRecordsList({ uid }) {
     );
 
     // ------Open Edit Modal-------
-    const [currentRecord, setCurrentRecord] = useState(null);
 
     const [modalEdit, setModalEdit] = useState(false);
     const toggleEdit = () => setModalEdit(!modalEdit);
@@ -126,31 +270,19 @@ export default function TrainingClassRecordsList({ uid }) {
     );
 
     // ------Set up Filter by Year-------
-    const [query, setQuery] = useState("all");
 
     const handleYearChange = (record) => {
         setQuery(record.target.value);
     };
 
-    let arryRecordsYears = [];
-
-    for (let i = 0; i < trainingClassRecords?.length; i++) {
-        arryRecordsYears.push(trainingClassRecords[i].year);
-    }
-
-    function removeDuplicates(arr) {
-        return [...new Set(arr)];
-    }
-
-    const arryRecordsYearsNoDup = removeDuplicates(arryRecordsYears);
-    console.log(arryRecordsYearsNoDup);
+    // Get unique years
+    const arryRecordsYearsNoDup = [...new Set(trainingClassRecords?.map((record) => record.year) || [])];
 
     const listByFilter = trainingClassRecords?.filter((record) => {
-        return query.toLowerCase() === "all" ? trainingClassRecords : record.year.toLowerCase().includes(query);
+        return query === "all" ? true : record.year === query;
     });
 
     // ------Set up Pagnation-------
-
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -158,16 +290,17 @@ export default function TrainingClassRecordsList({ uid }) {
     const firstRowIndex = lastRowIndex - rowsPerPage;
     const currentRows = listByFilter ? listByFilter.slice(firstRowIndex, lastRowIndex) : null;
 
-    // const currentRows = listByFilter ? listByFilter.slice(firstRowIndex, lastRowIndex) : null;
-
-    // const [filter, setFilter] = useState("all");
-
-    const { document: referee, error } = useDocument("users", uid);
     if (error) {
-        return <div className="error">{error}</div>;
+        return <div className="error-message">{error}</div>;
     }
-    if (!document) {
-        return <div className="loading">{t("general.loading")}</div>;
+
+    if (loading) {
+        return (
+            <div className="loading-message">
+                <CircularProgress />
+                <span>{t("general.loading")}</span>
+            </div>
+        );
     }
 
     return (
@@ -185,7 +318,13 @@ export default function TrainingClassRecordsList({ uid }) {
                 </div>
                 <div className="record-add-btn">
                     <Tooltip title={t("referee.class.addRecordbtn")} arrow placement="right-start">
-                        <Fab size="small" color="primary" aria-label="add" onClick={toggleAdd} sx={{marginLeft:"12px"}}>
+                        <Fab
+                            size="small"
+                            color="primary"
+                            aria-label="add"
+                            onClick={toggleAdd}
+                            sx={{ marginLeft: "12px" }}
+                        >
                             <AddIcon />
                         </Fab>
                         {/* <Button onClick={toggleAdd}>
@@ -205,13 +344,13 @@ export default function TrainingClassRecordsList({ uid }) {
                         <ModalHeader toggle={toggleAdd} close={closeBtnAdd}>
                             <div
                                 className="page-primary-title"
-                                style={{ marginLeft: "6px", borderBottom: "0", marginBottom: "0" }}
+                                style={{ marginLeft: "6px", borderBottom: "0", marginBottom: "0", color: "tomato" }}
                             >
                                 {t("referee.class.inputRecord")}
                             </div>
                         </ModalHeader>
                         <ModalBody>
-                            <AddTrainingClassRecord uid={uid} toggle={toggleAdd} />
+                            <AddTrainingClassRecordSB uid={uid} toggle={toggleAdd} />
                         </ModalBody>
                     </Modal>
                 </>
@@ -239,12 +378,10 @@ export default function TrainingClassRecordsList({ uid }) {
                         value={query}
                         onChange={handleYearChange}
                     >
-                        <option value="all">
-                           {t("referee.record.all-records")}
-                        </option>
+                        <option value="all">{t("referee.record.all-records")}</option>
                         {arryRecordsYearsNoDup.map((year, idx) => (
                             <option key={idx} value={year}>
-                               {year}
+                                {year}
                             </option>
                         ))}
                     </select>
@@ -313,7 +450,7 @@ export default function TrainingClassRecordsList({ uid }) {
                                             style={{
                                                 color: "white",
                                                 whiteSpace: "nowrap",
-                                                width: "310px",
+                                                width: "350px",
                                                 fontSize: "0.8rem",
                                             }}
                                         >
@@ -324,7 +461,7 @@ export default function TrainingClassRecordsList({ uid }) {
                                             style={{
                                                 color: "white",
                                                 whiteSpace: "nowrap",
-                                                width: "70px",
+                                                width: "65px",
                                                 fontSize: "0.8rem",
                                             }}
                                         >
@@ -371,7 +508,7 @@ export default function TrainingClassRecordsList({ uid }) {
                                                           align="center"
                                                           style={{ fontSize: "0.75rem" }}
                                                       >
-                                                          {moment.utc(record.date?.toDate()).format("MM/DD/YYYY")}
+                                                          {moment.utc(record?.date).format("MM/DD/YYYY")}
                                                       </TableCell>
                                                       {record.course === "G3 Course" && (
                                                           <TableCell align="center" style={{ fontSize: "0.75rem" }}>
@@ -386,13 +523,19 @@ export default function TrainingClassRecordsList({ uid }) {
                                                       {lang === "en" && (
                                                           <TableCell align="left">
                                                               <div className="record-org-wrapper">
-                                                                  <img
-                                                                      className="org-logo"
-                                                                      src={record.organization.value.logoURL}
-                                                                      alt="Org Logo"
-                                                                  />
+                                                                  {record.org.value?.logoURL ? (
+                                                                      <img
+                                                                          className="org-logo"
+                                                                          src={record.org.value?.logoURL}
+                                                                          alt="Org Logo"
+                                                                      />
+                                                                  ) : (
+                                                                      <span className="no-org-logo">
+                                                                          {record.org.value?.name[0]}
+                                                                      </span>
+                                                                  )}
                                                                   <span style={{ fontSize: "0.75rem" }}>
-                                                                      {record.organization.value?.name}
+                                                                      {record.org.value?.name}
                                                                   </span>
                                                               </div>
                                                           </TableCell>
@@ -400,29 +543,43 @@ export default function TrainingClassRecordsList({ uid }) {
                                                       {lang === "zh-TW" && (
                                                           <TableCell align="left">
                                                               <div className="record-org-wrapper">
-                                                                  <img
-                                                                      className="org-logo"
-                                                                      src={record.organization.value?.logoURL}
-                                                                      alt="referee"
-                                                                  />
+                                                                  {record.org.value?.logoURL ? (
+                                                                      <img
+                                                                          className="org-logo"
+                                                                          src={record.org.value?.logoURL}
+                                                                          alt="Org Logo"
+                                                                      />
+                                                                  ) : (
+                                                                      <span className="no-org-logo">
+                                                                          {record.org.value?.nameTw[0]}
+                                                                      </span>
+                                                                  )}
+
                                                                   <span style={{ fontSize: "0.75rem" }}>
                                                                       {" "}
-                                                                      {record.organization.value?.nameTw}
+                                                                      {record.org.value?.nameTw}
                                                                   </span>
                                                               </div>
                                                           </TableCell>
                                                       )}
                                                       {lang === "zh-CN" && (
                                                           <TableCell align="left">
-                                                              <div className="record-org-wrapper">
-                                                                  <img
-                                                                      className="org-logo"
-                                                                      src={record.organization.value?.logoURL}
-                                                                      alt="Org Logo"
-                                                                  />
+                                                              <div className="record-table-wrapper">
+                                                                  {record.org.value?.logoURL ? (
+                                                                      <img
+                                                                          className="org-logo"
+                                                                          src={record.org.value?.logoURL}
+                                                                          alt="Org Logo"
+                                                                      />
+                                                                  ) : (
+                                                                      <span className="no-org-logo">
+                                                                          {record.org.value?.nameCn[0]}
+                                                                      </span>
+                                                                  )}
+
                                                                   <span style={{ fontSize: "0.75rem" }}>
                                                                       {" "}
-                                                                      {record.organization.value?.nameCn}
+                                                                      {record.org.value?.nameCn}
                                                                   </span>
                                                               </div>
                                                           </TableCell>
@@ -430,23 +587,23 @@ export default function TrainingClassRecordsList({ uid }) {
                                                       <TableCell align="center">{record.number}</TableCell>
                                                       {lang === "en" && (
                                                           <TableCell align="center" style={{ fontSize: "0.75rem" }}>
-                                                              {record.country?.label === "Hong Kong SAR China"
+                                                              {record.country_en?.label === "Hong Kong SAR China"
                                                                   ? "Hong Kong"
-                                                                  : record.country?.label}
+                                                                  : record.country_en?.label}
                                                           </TableCell>
                                                       )}
                                                       {lang === "zh-TW" && (
                                                           <TableCell align="center" style={{ fontSize: "0.75rem" }}>
-                                                              {record.countryTw?.label === "中國香港特別行政區"
+                                                              {record.country_tw?.label === "中國香港特別行政區"
                                                                   ? "香港"
-                                                                  : record.countryTw?.label}
+                                                                  : record.country_tw?.label}
                                                           </TableCell>
                                                       )}
                                                       {lang === "zh-CN" && (
                                                           <TableCell align="center" style={{ fontSize: "0.75rem" }}>
-                                                              {record.countryCn?.label === "中国香港特别行政区"
+                                                              {record.country_cn?.label === "中国香港特别行政区"
                                                                   ? "香港"
-                                                                  : record.countryCn?.label}
+                                                                  : record.country_cn?.label}
                                                           </TableCell>
                                                       )}
                                                       <TableCell align="center" style={{ fontSize: "0.75rem" }}>
@@ -489,7 +646,7 @@ export default function TrainingClassRecordsList({ uid }) {
                                                                   </Tooltip>
                                                               </span>
 
-                                                              {uid === record.uid && (
+                                                              {uid === record.user_id && (
                                                                   <Tooltip
                                                                       title={t("admin.referee-list.delete")}
                                                                       arrow
@@ -498,7 +655,7 @@ export default function TrainingClassRecordsList({ uid }) {
                                                                       <DeleteIcon
                                                                           fontSize="small"
                                                                           style={{ color: "grey" }}
-                                                                          onClick={() => deleteDocument(record.id)}
+                                                                          onClick={() => handleDelete(record.id)}
                                                                       />
                                                                   </Tooltip>
                                                               )}
@@ -514,10 +671,20 @@ export default function TrainingClassRecordsList({ uid }) {
                                                               style={{ height: "auto" }}
                                                           >
                                                               <ModalHeader toggle={toggleEdit} close={closeBtnEdit}>
-                                                                  <h2>{t("admin.referee-list.edit")}</h2>
+                                                                  <div
+                                                                      className="page-primary-title"
+                                                                      style={{
+                                                                          marginLeft: "6px",
+                                                                          borderBottom: "0",
+                                                                          marginBottom: "0",
+                                                                          color: "tomato",
+                                                                      }}
+                                                                  >
+                                                                      {t("admin.referee-list.edit")}
+                                                                  </div>
                                                               </ModalHeader>
                                                               <ModalBody>
-                                                                  <EditTrainingClassRecord
+                                                                  <EditTrainingClassRecordSB
                                                                       uid={uid}
                                                                       toggle={toggleEdit}
                                                                       record={currentRecord}
@@ -538,13 +705,18 @@ export default function TrainingClassRecordsList({ uid }) {
                                                               <ModalHeader toggle={toggleUpload} close={closeBtnUpload}>
                                                                   <div
                                                                       className="page-primary-title"
-                                                                      style={{ marginBottom: "0", borderBottom: "0" }}
+                                                                      style={{
+                                                                          marginLeft: "6px",
+                                                                          borderBottom: "0",
+                                                                          marginBottom: "0",
+                                                                          color: "tomato",
+                                                                      }}
                                                                   >
                                                                       {t("referee.record.upload")}
                                                                   </div>
                                                               </ModalHeader>
                                                               <ModalBody>
-                                                                  <UploadTrainingClassFiles
+                                                                  <UploadTrainingClassFilesSB
                                                                       toggle={toggleUpload}
                                                                       record={currentRecord}
                                                                       uid={uid}
@@ -568,13 +740,18 @@ export default function TrainingClassRecordsList({ uid }) {
                                                               >
                                                                   <div
                                                                       className="page-primary-title"
-                                                                      style={{ marginBottom: "0", borderBottom: "0" }}
+                                                                      style={{
+                                                                          marginLeft: "6px",
+                                                                          borderBottom: "0",
+                                                                          marginBottom: "0",
+                                                                          color: "tomato",
+                                                                      }}
                                                                   >
                                                                       {t("referee.record.download")}
                                                                   </div>
                                                               </ModalHeader>
                                                               <ModalBody>
-                                                                  <DownloadTrainingClassFiles
+                                                                  <DownloadTrainingClassFilesSB
                                                                       toggle={toggleDownload}
                                                                       record={currentRecord}
                                                                       uid={uid}
@@ -665,9 +842,7 @@ export default function TrainingClassRecordsList({ uid }) {
                                                     </span>
 
                                                     <span style={{ fontFamily: "Georgia, serif", fontSize: "0.75rem" }}>
-                                                        {moment
-                                                            .utc(record.date.toDate().toDateString())
-                                                            .format("MM/DD/YYYY")}
+                                                        {moment.utc(record.date).format("MM/DD/YYYY")}
                                                     </span>
                                                 </div>
 
@@ -691,33 +866,33 @@ export default function TrainingClassRecordsList({ uid }) {
                                                                 fontSize: "0.75rem",
                                                             }}
                                                         >
-                                                            {record.country?.label === "Hong Kong SAR China"
+                                                            {record.country_en?.label === "Hong Kong SAR China"
                                                                 ? "Hong Kong"
-                                                                : record.country?.label}
+                                                                : record.country_en?.label}
                                                         </span>
                                                     )}
                                                     {lang === "zh-TW" && (
                                                         <span
-                                                        style={{
-                                                            fontFamily: "Georgia, serif",
-                                                            fontSize: "0.75rem",
-                                                        }}
+                                                            style={{
+                                                                fontFamily: "Georgia, serif",
+                                                                fontSize: "0.75rem",
+                                                            }}
                                                         >
-                                                            {record.countryTw?.label === "中國香港特別行政區"
+                                                            {record.country_tw?.label === "中國香港特別行政區"
                                                                 ? "香港"
-                                                                : record.countryTw?.label}
+                                                                : record.country_tw?.label}
                                                         </span>
                                                     )}
                                                     {lang === "zh-CN" && (
                                                         <span
-                                                        style={{
-                                                            fontFamily: "Georgia, serif",
-                                                            fontSize: "0.75rem",
-                                                        }}
+                                                            style={{
+                                                                fontFamily: "Georgia, serif",
+                                                                fontSize: "0.75rem",
+                                                            }}
                                                         >
-                                                            {record.countryCn?.label === "中国香港特别行政区"
+                                                            {record.country_cn?.label === "中国香港特别行政区"
                                                                 ? "香港"
-                                                                : record.countryCn?.label}
+                                                                : record.country_cn?.label}
                                                         </span>
                                                     )}
                                                 </div>
@@ -737,31 +912,31 @@ export default function TrainingClassRecordsList({ uid }) {
                                                 </span>{" "}
                                                 {record.organization && (
                                                     <div className="record-org-wrapper">
-                                                        {record.organization?.value?.logoURL ? (
+                                                        {record.org.value?.logoURL ? (
                                                             <img
                                                                 className="org-logo"
-                                                                src={record.organization?.value?.logoURL}
+                                                                src={record.org.value?.logoURL}
                                                                 alt="referee"
                                                             />
                                                         ) : (
                                                             <span className="no-org-logo">
-                                                                {record.organization?.value?.name[0]}
+                                                                {record.org.value?.name[0]}
                                                             </span>
                                                         )}
 
                                                         {lang === "en" && (
                                                             <span style={{ color: "#4B0082", fontSize: "0.75rem" }}>
-                                                                {record.organization?.value?.name}
+                                                                {record.org.value?.name}
                                                             </span>
                                                         )}
                                                         {lang === "zh-TW" && (
                                                             <span style={{ color: "#4B0082", fontSize: "0.75rem" }}>
-                                                                {record.organization?.value?.nameTw}
+                                                                {record.org.value?.nameTw}
                                                             </span>
                                                         )}
                                                         {lang === "zh-CN" && (
                                                             <span style={{ color: "#4B0082", fontSize: "0.75rem" }}>
-                                                                {record.organization?.value?.nameCn}
+                                                                {record.org.value?.nameCn}
                                                             </span>
                                                         )}
                                                     </div>
@@ -828,7 +1003,7 @@ export default function TrainingClassRecordsList({ uid }) {
                                                     </Tooltip>
                                                 </span>
 
-                                                {uid === record.uid && (
+                                                {uid === record.user_id && (
                                                     <span>
                                                         <Tooltip
                                                             title={t("admin.referee-list.delete")}
@@ -838,7 +1013,7 @@ export default function TrainingClassRecordsList({ uid }) {
                                                             <DeleteIcon
                                                                 fontSize="small"
                                                                 style={{ color: "grey", cursor: "pointer" }}
-                                                                onClick={() => deleteDocument(record.id)}
+                                                                onClick={() => handleDelete(record.id)}
                                                             />
                                                         </Tooltip>
                                                     </span>
@@ -862,13 +1037,18 @@ export default function TrainingClassRecordsList({ uid }) {
                                 <ModalHeader toggle={toggleEdit} close={closeBtnEdit}>
                                     <div
                                         className="page-primary-title"
-                                        style={{ marginBottom: "0", borderBottom: "0" }}
+                                        style={{
+                                            marginLeft: "6px",
+                                            borderBottom: "0",
+                                            marginBottom: "0",
+                                            color: "tomato",
+                                        }}
                                     >
                                         {t("admin.referee-list.edit")}
                                     </div>
                                 </ModalHeader>
                                 <ModalBody>
-                                    <EditTrainingClassRecord uid={uid} toggle={toggleEdit} record={currentRecord} />
+                                    <EditTrainingClassRecordSB uid={uid} toggle={toggleEdit} record={currentRecord} />
                                 </ModalBody>
                             </Modal>
                         </>
@@ -884,13 +1064,18 @@ export default function TrainingClassRecordsList({ uid }) {
                                 <ModalHeader toggle={toggleUpload} close={closeBtnUpload}>
                                     <div
                                         className="page-primary-title"
-                                        style={{ marginBottom: "0", borderBottom: "0" }}
+                                        style={{
+                                            marginLeft: "6px",
+                                            borderBottom: "0",
+                                            marginBottom: "0",
+                                            color: "tomato",
+                                        }}
                                     >
                                         {t("referee.record.upload")}
                                     </div>
                                 </ModalHeader>
                                 <ModalBody>
-                                    <UploadTrainingClassFiles
+                                    <UploadTrainingClassFilesSB
                                         toggle={toggleUpload}
                                         record={currentRecord}
                                         uid={uid}
@@ -911,13 +1096,18 @@ export default function TrainingClassRecordsList({ uid }) {
                                 <ModalHeader toggle={toggleDownload} close={closeBtnDownload}>
                                     <div
                                         className="page-primary-title"
-                                        style={{ marginBottom: "0", borderBottom: "0" }}
+                                        style={{
+                                            marginLeft: "6px",
+                                            borderBottom: "0",
+                                            marginBottom: "0",
+                                            color: "tomato",
+                                        }}
                                     >
                                         {t("referee.record.download")}
                                     </div>
                                 </ModalHeader>
                                 <ModalBody>
-                                    <DownloadTrainingClassFiles
+                                    <DownloadTrainingClassFilesSB
                                         toggle={toggleDownload}
                                         record={currentRecord}
                                         uid={uid}

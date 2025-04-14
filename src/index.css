@@ -277,6 +277,34 @@ text-indent: 0px;
     color: var(--secondary);
 }
 
+.loading-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100px;
+    color: #666;
+}
+
+.loading-message {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+.error-message {
+    color: #f44336;
+    text-align: center;
+    padding: 16px;
+    background-color: #ffebee;
+    border-radius: 4px;
+    margin: 16px;
+}
+
+.profile-content.error {
+    color: #f44336;
+    font-style: italic;
+}
+
 /* Extra large devices (large laptops and desktops, 1200px and up) */
 @media screen and (max-width: 1200px) {
     .wwsc-container {

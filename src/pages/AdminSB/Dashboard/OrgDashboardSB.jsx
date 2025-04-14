@@ -1,7 +1,7 @@
 /** @format */
 
 import "./AdminDashboard.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../../../supabase/supabaseClient";
 import { CircularProgress, Container, MenuItem, TextField } from "@mui/material";
 import { useTranslation } from "react-i18next";
@@ -35,33 +35,60 @@ export default function OrgDashboardSB() {
     const [colorScheme, setColorScheme] = useState("blueberryTwilight");
 
     // Fetch organizations from Supabase
-    useEffect(() => {
-        const fetchOrganizations = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from("organizations")
-                    .select(
-                        `
-                        *,
-                        country:country_en->label,
-                        countryTw:country_tw->label,
-                        countryCn:country_cn->label
+    const fetchOrganizations = useCallback(async () => {
+        try {
+            setLoading(true);
+            const { data, error } = await supabase
+                .from("organizations")
+                .select(
                     `
-                    )
-                    .order("name");
+                    *,
+                    country:country_en->label,
+                    countryTw:country_tw->label,
+                    countryCn:country_cn->label
+                `
+                )
+                .order("name");
 
-                if (error) throw error;
-                setOrgList(data);
-            } catch (err) {
-                console.error("Error fetching organizations:", err);
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchOrganizations();
+            if (error) throw error;
+            setOrgList(data);
+        } catch (err) {
+            console.error("Error fetching organizations:", err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
     }, []);
+
+    // Initial data fetch
+    useEffect(() => {
+        fetchOrganizations();
+    }, [fetchOrganizations]);
+
+    // Set up realtime subscriptions
+    useEffect(() => {
+        // Subscribe to organizations table changes
+        const orgsSubscription = supabase
+            .channel("dashboard-orgs-changes")
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "organizations",
+                },
+                (payload) => {
+                    console.log("Organization change received:", payload);
+                    fetchOrganizations();
+                }
+            )
+            .subscribe();
+
+        // Cleanup subscription on unmount
+        return () => {
+            supabase.removeChannel(orgsSubscription);
+        };
+    }, [fetchOrganizations]);
 
     // Calculate authorized orgs
     const authOrgList = orgList?.filter((org) => org.is_authorized === true);
@@ -89,7 +116,7 @@ export default function OrgDashboardSB() {
     };
 
     // Use the function to create pie chart data for each language
- 
+
     const pieChartData = {
         en: processCountryData(orgList, "country_en"),
         tw: processCountryData(orgList, "country_tw"),

@@ -1,7 +1,7 @@
 /** @format */
 
 import "./OrgList.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../../../supabase/supabaseClient";
 import Chip from "@mui/joy/Chip";
 
@@ -62,46 +62,71 @@ export default function OrgListCompSB() {
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
     // Fetch all organizations
-    useEffect(() => {
-        const fetchOrganizations = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from("organizations")
-                    .select(
-                        `
-                            id,
-                            name,
-                            name_tw,
-                            name_cn,
-                            city,
-                            city_tw,
-                            city_cn,
-                            logo_url,
-                            org_url,
-                            is_authorized,
-                            status,
-                            from_date,
-                            to_date,
-                            years,
-                            country_en,
-                            country_tw,
-                            country_cn
-                        `
-                    )
-                    .order("name", { ascending: true });
+    const fetchOrganizations = useCallback(async () => {
+        try {
+            setLoading(true);
+            const { data, error } = await supabase
+                .from("organizations")
+                .select(`
+                    id,
+                    name,
+                    name_tw,
+                    name_cn,
+                    city,
+                    city_tw,
+                    city_cn,
+                    logo_url,
+                    org_url,
+                    is_authorized,
+                    status,
+                    from_date,
+                    to_date,
+                    years,
+                    country_en,
+                    country_tw,
+                    country_cn
+                `)
+                .order("name", { ascending: true });
 
-                if (error) throw error;
-                setOrganizations(data);
-            } catch (err) {
-                console.error("Error fetching organizations:", err);
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchOrganizations();
+            if (error) throw error;
+            setOrganizations(data);
+        } catch (err) {
+            console.error("Error fetching organizations:", err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
     }, []);
+
+    // Initial data fetch
+    useEffect(() => {
+        fetchOrganizations();
+    }, [fetchOrganizations]);
+
+    // Set up realtime subscriptions
+    useEffect(() => {
+        // Subscribe to organizations table changes
+        const orgsSubscription = supabase
+            .channel('org-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*', // Listen to all changes
+                    schema: 'public',
+                    table: 'organizations'
+                },
+                (payload) => {
+                    console.log('Organization change received:', payload);
+                    fetchOrganizations(); // Refresh data when changes occur
+                }
+            )
+            .subscribe();
+
+        // Cleanup subscription
+        return () => {
+            supabase.removeChannel(orgsSubscription);
+        };
+    }, [fetchOrganizations]);
 
     // Handle delete
     const handleDelete = async (id) => {

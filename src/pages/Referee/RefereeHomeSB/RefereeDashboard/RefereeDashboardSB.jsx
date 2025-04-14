@@ -2,9 +2,10 @@
 
 import "./RefereeDashboard.css";
 
-import React, { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "../../../../supabase/supabaseClient";
 import Chip from "@mui/joy/Chip";
-import { useMediaQuery } from "@mui/material";
+import { CircularProgress, useMediaQuery } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { PieChart } from "@mui/x-charts/PieChart";
 import Box from "@mui/material/Box";
@@ -15,7 +16,7 @@ import ReadMoreIcon from "@mui/icons-material/ReadMore";
 import Tooltip from "@mui/material/Tooltip";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
-import { useCollection } from "../../../../hooks/useCollection";
+
 import { styled } from "@mui/material/styles";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import EventIcon from "@mui/icons-material/Event";
@@ -46,19 +47,143 @@ export default function RefereeDashboardSB({ referee, uid }) {
     const { t, i18n } = useTranslation("global");
     const lang = i18n.language;
 
+    const [refereeGameRecords, setRefereeGameRecords] = useState(null);
+    const [TrainingClassRecords, setTrainingClassRecords] = useState(null);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
+
     const mb = useMediaQuery("(max-width:600px)");
-    // const tbScreen = useMediaQuery("(max-width:900px)");
 
     const prevRef = useRef(null);
     const nextRef = useRef(null);
 
-    const { documents: refereeGameRecords } = useCollection(`users/${uid}/games`, ["uid", "==", uid], ["date", "desc"]);
+    const fetchGameRecords = useCallback(async () => {
+        try {
+            setLoading(true);
+            const { data, error } = await supabase
+                .from("games")
+                .select(
+                    `
+                    *,
+                    organizations (
+                        id,
+                        name,
+                        name_tw,
+                        name_cn,
+                        logo_url
+                    )
+                `
+                )
+                .eq("user_id", uid)
+                .order("date", { ascending: false });
 
-    const { documents: TrainingClassRecords } = useCollection(
-        `users/${uid}/class`,
-        ["uid", "==", uid],
-        ["date", "desc"]
-    );
+            if (error) throw error;
+            setRefereeGameRecords(data);
+        } catch (err) {
+            console.error("Error fetching game records:", err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    }, [uid]);
+
+    // Fetch training class records
+    const fetchTrainingRecords = useCallback(async () => {
+        try {
+            const { data, error } = await supabase
+                .from("class")
+                .select(
+                    `
+                    *,
+                    organizations (
+                        id,
+                        name,
+                        name_tw,
+                        name_cn,
+                        logo_url
+                    )
+                `
+                )
+                .eq("user_id", uid)
+                .order("date", { ascending: false });
+
+            if (error) throw error;
+            setTrainingClassRecords(data);
+        } catch (err) {
+            console.error("Error fetching training records:", err);
+            setError(err.message);
+        }
+    }, [uid]);
+
+    // Initial data fetch
+    useEffect(() => {
+        fetchGameRecords();
+        fetchTrainingRecords();
+    }, [fetchGameRecords, fetchTrainingRecords]);
+
+    // Set up realtime subscriptions
+    useEffect(() => {
+        // Subscribe to games table changes
+        const gamesSubscription = supabase
+            .channel("dashboard-games")
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "games",
+                    filter: `user_id=eq.${uid}`,
+                },
+                (payload) => {
+                    console.log("Game change received:", payload);
+                    fetchGameRecords();
+                }
+            )
+            .subscribe();
+
+        // Subscribe to training class changes
+        const classSubscription = supabase
+            .channel("dashboard-class")
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "class",
+                    filter: `user_id=eq.${uid}`,
+                },
+                (payload) => {
+                    console.log("Training class change received:", payload);
+                    fetchTrainingRecords();
+                }
+            )
+            .subscribe();
+
+        // Subscribe to referee changes
+        const refereeSubscription = supabase
+            .channel("dashboard-referee")
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "referees",
+                    filter: `id=eq.${uid}`,
+                },
+                (payload) => {
+                    console.log("Referee change received:", payload);
+                    // Update referee data if needed
+                }
+            )
+            .subscribe();
+
+        // Cleanup subscriptions
+        return () => {
+            supabase.removeChannel(gamesSubscription);
+            supabase.removeChannel(classSubscription);
+            supabase.removeChannel(refereeSubscription);
+        };
+    }, [uid, fetchGameRecords, fetchTrainingRecords]);
 
     // ------Set up Filter by Year-------
 
@@ -253,7 +378,7 @@ export default function RefereeDashboardSB({ referee, uid }) {
     let arryGameRecordsCountry = [];
 
     for (let i = 0; i < refereeGameRecords?.length; i++) {
-        arryGameRecordsCountry.push(refereeGameRecords[i].country?.label);
+        arryGameRecordsCountry.push(refereeGameRecords[i].country_en?.label);
     }
 
     const arryGameRecordsCountryNoDup = removeDuplicates(arryGameRecordsCountry);
@@ -272,7 +397,7 @@ export default function RefereeDashboardSB({ referee, uid }) {
 
     for (let i = 0; i < arryGameRecordsCountryNoDup?.length; i++) {
         const gameRecordsByCountry = refereeGameRecords?.filter((game) => {
-            return game.country?.label === arryGameRecordsCountryNoDup[i];
+            return game.country_en?.label === arryGameRecordsCountryNoDup[i];
         });
 
         arryLengthCountry.push(gameRecordsByCountry.length);
@@ -297,7 +422,7 @@ export default function RefereeDashboardSB({ referee, uid }) {
     let arryGameRecordsCountryTw = [];
 
     for (let i = 0; i < refereeGameRecords?.length; i++) {
-        arryGameRecordsCountryTw.push(refereeGameRecords[i].countryTw?.label);
+        arryGameRecordsCountryTw.push(refereeGameRecords[i].country_tw?.label);
     }
 
     const arryGameRecordsCountryTwNoDup = removeDuplicates(arryGameRecordsCountryTw);
@@ -310,7 +435,7 @@ export default function RefereeDashboardSB({ referee, uid }) {
 
     for (let i = 0; i < arryGameRecordsCountryTwNoDup?.length; i++) {
         const gameRecordsByCountryTw = refereeGameRecords?.filter((game) => {
-            return game.countryTw?.label === arryGameRecordsCountryTwNoDup[i];
+            return game.country_tw?.label === arryGameRecordsCountryTwNoDup[i];
         });
 
         arryLengthCountryTw.push(gameRecordsByCountryTw.length);
@@ -329,7 +454,7 @@ export default function RefereeDashboardSB({ referee, uid }) {
     let arryGameRecordsCountryCn = [];
 
     for (let i = 0; i < refereeGameRecords?.length; i++) {
-        arryGameRecordsCountryCn.push(refereeGameRecords[i].countryCn?.label);
+        arryGameRecordsCountryCn.push(refereeGameRecords[i].country_cn?.label);
     }
 
     const arryGameRecordsCountryCnNoDup = removeDuplicates(arryGameRecordsCountryCn);
@@ -342,7 +467,7 @@ export default function RefereeDashboardSB({ referee, uid }) {
 
     for (let i = 0; i < arryGameRecordsCountryCnNoDup?.length; i++) {
         const gameRecordsByCountryCn = refereeGameRecords?.filter((game) => {
-            return game.countryCn?.label === arryGameRecordsCountryCnNoDup[i];
+            return game.country_cn?.label === arryGameRecordsCountryCnNoDup[i];
         });
 
         arryLengthCountryCn.push(gameRecordsByCountryCn.length);
@@ -687,7 +812,7 @@ export default function RefereeDashboardSB({ referee, uid }) {
                 </div>
 
                 <div className="item-more-info" style={{ position: "absolute", bottom: "6px", right: "12px" }}>
-                    <Link to="/referee-zone/referee-home-SB/referee-game-records">
+                    <Link to="/referee-zone/referee-home-SB/referee-training-class-records">
                         <Tooltip
                             title={t("referee.dashboard.training-class-instructor-records")}
                             arrow
@@ -1008,79 +1133,92 @@ export default function RefereeDashboardSB({ referee, uid }) {
 
     return (
         <>
-            <div className="page-primary-title" style={{ marginLeft: "6px" }}>
-                <div className="dashboard-title-wrapper">
-                    <DashboardIcon className="sidebar-admin-icon" style={{ fontSize: "30px" }} />
-                    {referee.grade !== "0" ? t("referee.dashboard.referee-title") : t("referee.dashboard.rit-title")}
+            {error && <div className="error-message">{error}</div>}
+
+            {loading ? (
+                <div className="loading-container">
+                    <CircularProgress />
+                    <div className="loading-text">{t("general.loading")}</div>
                 </div>
-            </div>
+            ) : (
+                <>
+                    <div className="page-primary-title" style={{ marginLeft: "6px" }}>
+                        <div className="dashboard-title-wrapper">
+                            <DashboardIcon className="sidebar-admin-icon" style={{ fontSize: "30px" }} />
+                            {referee.grade !== "0"
+                                ? t("referee.dashboard.referee-title")
+                                : t("referee.dashboard.rit-title")}
+                        </div>
+                    </div>
 
-            <div className="dashboard-card-container">
-                <div>
-                    {!mb ? (
-                        <Box sx={{ width: "100%", marginTop: "0px" }}>
-                            <Stack direction={{ xs: "column", md: "row" }} spacing={{ xs: 1, sm: 1, md: 1 }}>
-                                {refereeProfileCard}
-                                {refereeGamesRecordsProgress}
-                                {refereeTrainingClassRecordsProgress}
-                            </Stack>
-                            <Stack
-                                direction={{ xs: "column", md: "row" }}
-                                spacing={{ xs: 1, sm: 1, md: 1 }}
-                                style={{ marginTop: "10px" }}
-                            >
-                                {refereeGameRecordsPiechart}
-                                {refereeGameRecordsBarchart}
-                            </Stack>
-                        </Box>
-                    ) : (
-                        <Box sx={{ width: "250px", marginTop: "0px" }}>
-                            <div className="swiper-buttons">
-                                <div ref={prevRef} className="swiper-button-prev"></div>
-                                <div ref={nextRef} className="swiper-button-next"></div>
-                            </div>
+                    <div className="dashboard-card-container">
+                        <div>
+                            {!mb ? (
+                                <Box sx={{ width: "100%", marginTop: "0px" }}>
+                                    <Stack direction={{ xs: "column", md: "row" }} spacing={{ xs: 1, sm: 1, md: 1 }}>
+                                        {refereeProfileCard}
+                                        {refereeGamesRecordsProgress}
+                                        {refereeTrainingClassRecordsProgress}
+                                    </Stack>
+                                    <Stack
+                                        direction={{ xs: "column", md: "row" }}
+                                        spacing={{ xs: 1, sm: 1, md: 1 }}
+                                        style={{ marginTop: "10px" }}
+                                    >
+                                        {refereeGameRecordsPiechart}
+                                        {refereeGameRecordsBarchart}
+                                    </Stack>
+                                </Box>
+                            ) : (
+                                <Box sx={{ width: "250px", marginTop: "0px" }}>
+                                    <div className="swiper-buttons">
+                                        <div ref={prevRef} className="swiper-button-prev"></div>
+                                        <div ref={nextRef} className="swiper-button-next"></div>
+                                    </div>
 
-                            <Swiper
-                                // install Swiper modules
-                                modules={[Navigation, Pagination, Scrollbar, Autoplay, EffectCoverflow]}
-                                spaceBetween={10}
-                                slidesPerView={1}
-                                navigation={{ prevEl: prevRef.current, nextEl: nextRef.current }}
-                                // pagination={{
-                                //     clickable: true,
+                                    <Swiper
+                                        // install Swiper modules
+                                        modules={[Navigation, Pagination, Scrollbar, Autoplay, EffectCoverflow]}
+                                        spaceBetween={10}
+                                        slidesPerView={1}
+                                        navigation={{ prevEl: prevRef.current, nextEl: nextRef.current }}
+                                        // pagination={{
+                                        //     clickable: true,
 
-                                // }}
-                                scrollbar={{ draggable: true }}
-                                onSwiper={(swiper) => console.log(swiper)}
-                                onSlideChange={() => console.log("slide change")}
-                                autoplay={{ delay: 5000 }}
-                                effect={"coverflow"}
-                                coverflowEffect={{
-                                    rotate: 30,
-                                    slideShadows: false,
-                                }}
-                            >
-                                <SwiperSlide>{refereeProfileCard}</SwiperSlide>
-                                {/* <SwiperSlide>
+                                        // }}
+                                        scrollbar={{ draggable: true }}
+                                        onSwiper={(swiper) => console.log(swiper)}
+                                        onSlideChange={() => console.log("slide change")}
+                                        autoplay={{ delay: 5000 }}
+                                        effect={"coverflow"}
+                                        coverflowEffect={{
+                                            rotate: 30,
+                                            slideShadows: false,
+                                        }}
+                                    >
+                                        <SwiperSlide>{refereeProfileCard}</SwiperSlide>
+                                        {/* <SwiperSlide>
                                     <RefereeCardSmall referee={referee} />
                                 </SwiperSlide> */}
 
-                                <SwiperSlide>
-                                    {refereeGamesRecordsProgress}
-                                    {refereeTrainingClassRecordsProgress}
-                                </SwiperSlide>
-                                <SwiperSlide>
-                                    {refereeGameRecordsPiechart}
-                                    {refereeGameRecordsBarchart}
-                                </SwiperSlide>
-                            </Swiper>
-                        </Box>
-                    )}
-                </div>
+                                        <SwiperSlide>
+                                            {refereeGamesRecordsProgress}
+                                            {refereeTrainingClassRecordsProgress}
+                                        </SwiperSlide>
+                                        <SwiperSlide>
+                                            {refereeGameRecordsPiechart}
+                                            {refereeGameRecordsBarchart}
+                                        </SwiperSlide>
+                                    </Swiper>
+                                </Box>
+                            )}
+                        </div>
 
-                <br />
-                <br />
-            </div>
+                        <br />
+                        <br />
+                    </div>
+                </>
+            )}
         </>
     );
 }

@@ -2,7 +2,7 @@
 
 import "./GameRecordsList.css";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "../../../../supabase/supabaseClient";
 import { toast } from "react-toastify";
@@ -40,97 +40,153 @@ import EditGameRecordSB from "./EditGameRecordSB";
 import AddGameRecordSB from "./AddGameRecordSB";
 import UploadRefereeGameFilesSB from "./UploadRefereeGameFilesSB";
 import DownloadRefereeGameFilesSB from "./DownloadRefereeGameFilesSB";
-import { PrimaryTitle } from "../../../../components/Text/Title/Title";
+
 
 export default function GameRecordsListSB({ uid }) {
     const { t, i18n } = useTranslation("global");
     const lang = i18n.language;
     const isSmallScreen = useMediaQuery("(max-width:900px)");
 
-    const [loading, setLoading] = useState(false);
     const [refereeGameRecords, setRefereeGameRecords] = useState(null);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [query, setQuery] = useState("all");
     const [currentRecord, setCurrentRecord] = useState(null);
 
     const [referee, setReferee] = useState(null);
-    // Fetch referee data
-    useEffect(() => {
-        const fetchReferee = async () => {
-            try {
-                const { data, error } = await supabase.from("referees").select().eq("id", uid).single();
 
-                if (error) throw error;
-                setReferee(data);
-            } catch (err) {
-                console.error("Error fetching referee:", err);
-                setError(err.message);
-            }
-        };
+    // Wrap fetchData in useCallback
+    const fetchData = useCallback(async () => {
+        try {
+            setLoading(true);
 
-        fetchReferee();
-    }, [uid]);
+            // Fetch referee data
+            const { data: refereeData, error: refereeError } = await supabase
+                .from("referees")
+                .select()
+                .eq("id", uid)
+                .single();
 
-    // Fetch game records
-    useEffect(() => {
-        const fetchGameRecords = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from("games")
-                    .select(
-                        `
-                        *,
-                        organizations:org_id (
-                            id,
-                            name,
-                            name_tw,
-                            name_cn,
-                            org_url,
-                            logo_url
-                        )
+            if (refereeError) throw refereeError;
+            setReferee(refereeData);
+
+            // Fetch game records with organizations
+            const { data: gameData, error: gameError } = await supabase
+                .from("games")
+                .select(
                     `
-                    )
-                    .eq("user_id", uid)
-                    .order("date", { ascending: false });
+                *,
+                organizations:org_id (
+                    id,
+                    name,
+                    name_tw,
+                    name_cn,
+                    org_url,
+                    logo_url
+                )
+            `
+                )
+                .eq("user_id", uid)
+                .order("date", { ascending: false });
 
-                if (error) throw error;
+            if (gameError) throw gameError;
 
-                // Transform data to match component expectations
-                const transformedData = data.map((game) => ({
-                    ...game,
-                    // Format the date properly
-                    date: game.date, // Already an ISO string from Supabase
-                    org: {
-                        value: {
-                            id: game.organizations.id,
-                            name: game.organizations.name,
-                            nameTw: game.organizations.name_tw,
-                            nameCn: game.organizations.name_cn,
-                            orgURL: game.organizations.org_url,
-                            logoURL: game.organizations.logo_url,
-                        },
-                        label: game.organizations.name,
+            // Transform data
+            const transformedData = gameData.map((game) => ({
+                ...game,
+                date: game.date,
+                org: {
+                    value: {
+                        id: game.organizations?.id,
+                        name: game.organizations?.name,
+                        nameTw: game.organizations?.name_tw,
+                        nameCn: game.organizations?.name_cn,
+                        orgURL: game.organizations?.org_url,
+                        logoURL: game.organizations?.logo_url,
                     },
-                }));
+                    label: game.organizations?.name,
+                },
+            }));
 
-                setRefereeGameRecords(transformedData);
-                console.log(transformedData);
-            } catch (err) {
-                console.error("Error fetching game records:", err);
-                setError(err.message);
-            } finally {
-                setLoading(false); // Set loading to false after fetch completes
-            }
+            setRefereeGameRecords(transformedData);
+        } catch (err) {
+            console.error("Error fetching data:", err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    }, [uid]); // Add uid as dependency
+
+    // Initial data fetch
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]); //
+
+    // Set up realtime subscriptions
+    useEffect(() => {
+        // Subscribe to games table changes
+        const gamesSubscription = supabase
+            .channel("games-changes")
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "games",
+                    filter: `user_id=eq.${uid}`,
+                },
+                () => {
+                    fetchData();
+                }
+            )
+            .subscribe();
+
+        // Subscribe to organizations table changes
+        const orgsSubscription = supabase
+            .channel("orgs-changes")
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "organizations",
+                },
+                () => {
+                    fetchData();
+                }
+            )
+            .subscribe();
+
+        // Subscribe to referees table changes
+        const refereesSubscription = supabase
+            .channel("referees-changes")
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "referees",
+                    filter: `id=eq.${uid}`,
+                },
+                () => {
+                    fetchData();
+                }
+            )
+            .subscribe();
+
+        // Cleanup subscriptions
+        return () => {
+            supabase.removeChannel(gamesSubscription);
+            supabase.removeChannel(orgsSubscription);
+            supabase.removeChannel(refereesSubscription);
         };
-
-        fetchGameRecords();
-    }, [uid]);
+    }, [uid, fetchData]);
 
     // Handle delete
     const handleDelete = async (id) => {
         try {
             setLoading(true);
-            const { error } = await supabase.from("games").delete().eq("id", id);
+            const { error } = await supabase.from("games").delete().eq("id", id).eq("user_id", uid);
 
             if (error) throw error;
 
@@ -218,11 +274,22 @@ export default function GameRecordsListSB({ uid }) {
     const firstRowIndex = lastRowIndex - rowsPerPage;
     const currentRows = listByFilter?.slice(firstRowIndex, lastRowIndex);
 
+    if (error) {
+        return <div className="error-message">{error}</div>;
+    }
+
+    if (loading) {
+        return <div className="loading-message">{t("general.loading")}</div>;
+    }
+
     return (
         <div className="record-list-container" style={{ width: "100%", marginRight: "0" }}>
             {error && <p>{error}</p>}
             <div className="record-list-top">
-                <div className="page-primary-title" style={{ marginLeft: "6px" }}>
+                <div
+                    className={!isSmallScreen ? "page-primary-title" : "page-secondary-title"}
+                    style={{ marginLeft: "6px" }}
+                >
                     <div className="dashboard-title-wrapper">
                         <SportsIcon className="sidebar-admin-icon" style={{ fontSize: "30px" }} />
                         {t("referee.record.game-title")}
@@ -230,9 +297,6 @@ export default function GameRecordsListSB({ uid }) {
                 </div>
                 <div className="record-add-btn">
                     <Tooltip title={t("referee.record.addRecordbtn")} arrow placement="right-start">
-                        {/* <Button onClick={toggleAdd}>
-                            <PostAddOutlinedIcon fontSize="medium" />
-                        </Button> */}
                         <Fab
                             size="small"
                             color="primary"
@@ -254,7 +318,12 @@ export default function GameRecordsListSB({ uid }) {
                         style={{ height: "auto" }}
                     >
                         <ModalHeader toggle={toggleAdd} close={closeBtnAdd} style={{ borderBottom: "0" }}>
-                            <PrimaryTitle text={t("referee.record.inputRecord")} />
+                            <div
+                                className="page-primary-title"
+                                style={{ marginLeft: "6px", borderBottom: "0", marginBottom: "0", color: "tomato" }}
+                            >
+                                {t("referee.record.inputRecord")}
+                            </div>
                         </ModalHeader>
                         <ModalBody>
                             <AddGameRecordSB uid={uid} toggle={toggleAdd} />
@@ -348,7 +417,7 @@ export default function GameRecordsListSB({ uid }) {
                                             style={{
                                                 color: "white",
                                                 whiteSpace: "nowrap",
-                                                width: "300px",
+                                                width: "280px",
                                                 fontSize: "0.8rem",
                                             }}
                                         >
@@ -359,7 +428,7 @@ export default function GameRecordsListSB({ uid }) {
                                             style={{
                                                 color: "white",
                                                 whiteSpace: "nowrap",
-                                                width: "300px",
+                                                width: "350px",
                                                 fontSize: "0.8rem",
                                             }}
                                         >
@@ -548,7 +617,7 @@ export default function GameRecordsListSB({ uid }) {
                                                                   />
                                                               </Tooltip>
                                                           </span>
-                                                          {uid === record.uid && (
+                                                          {uid === record.user_id && (
                                                               <Tooltip
                                                                   title={t("admin.referee-list.delete")}
                                                                   arrow
@@ -574,7 +643,17 @@ export default function GameRecordsListSB({ uid }) {
                                                           style={{ height: "auto" }}
                                                       >
                                                           <ModalHeader toggle={toggleEdit} close={closeBtnEdit}>
-                                                              <PrimaryTitle text={t("admin.referee-list.edit")} />
+                                                              <div
+                                                                  className="page-primary-title"
+                                                                  style={{
+                                                                      marginLeft: "6px",
+                                                                      borderBottom: "0",
+                                                                      marginBottom: "0",
+                                                                      color: "tomato",
+                                                                  }}
+                                                              >
+                                                                  {t("admin.referee-list.edit")}
+                                                              </div>
                                                           </ModalHeader>
                                                           <ModalBody>
                                                               <EditGameRecordSB
@@ -597,7 +676,12 @@ export default function GameRecordsListSB({ uid }) {
                                                           <ModalHeader toggle={toggleUpload} close={closeBtnUpload}>
                                                               <div
                                                                   className="page-primary-title"
-                                                                  style={{ marginBottom: "0", borderBottom: "0" }}
+                                                                  style={{
+                                                                      marginLeft: "6px",
+                                                                      borderBottom: "0",
+                                                                      marginBottom: "0",
+                                                                      color: "tomato",
+                                                                  }}
                                                               >
                                                                   {t("referee.record.upload")}
                                                               </div>
@@ -624,7 +708,12 @@ export default function GameRecordsListSB({ uid }) {
                                                           <ModalHeader toggle={toggleDownload} close={closeBtnDownload}>
                                                               <div
                                                                   className="page-primary-title"
-                                                                  style={{ marginBottom: "0", borderBottom: "0" }}
+                                                                  style={{
+                                                                      marginLeft: "6px",
+                                                                      borderBottom: "0",
+                                                                      marginBottom: "0",
+                                                                      color: "tomato",
+                                                                  }}
                                                               >
                                                                   {t("referee.record.download")}
                                                               </div>
@@ -768,7 +857,7 @@ export default function GameRecordsListSB({ uid }) {
                                                                 fontSize: "small",
                                                             }}
                                                         >
-                                                            {record.countryTw?.label === "中國香港特別行政區"
+                                                            {record.country_tw?.label === "中國香港特別行政區"
                                                                 ? "香港"
                                                                 : record.country_tw?.label}
                                                         </span>
@@ -861,7 +950,7 @@ export default function GameRecordsListSB({ uid }) {
                                                     </Tooltip>
                                                 </span>
 
-                                                {uid === record.uid && (
+                                                {uid === record.user_id && (
                                                     <span>
                                                         <Tooltip
                                                             title={t("admin.referee-list.delete")}
@@ -893,7 +982,18 @@ export default function GameRecordsListSB({ uid }) {
                                 style={{ height: "auto" }}
                             >
                                 <ModalHeader toggle={toggleEdit} close={closeBtnEdit}>
-                                    <PrimaryTitle text={t("admin.referee-list.edit")} />
+                                <div
+                                        className="page-primary-title"
+                                        style={{
+                                            marginLeft: "6px",
+                                            borderBottom: "0",
+                                            marginBottom: "0",
+                                            color: "tomato",
+                                        }}
+                                    >
+                                       {t("admin.referee-list.edit")}
+                                    </div>
+                                   
                                 </ModalHeader>
                                 <ModalBody>
                                     <EditGameRecordSB uid={uid} toggle={toggleEdit} record={currentRecord} />
@@ -910,7 +1010,17 @@ export default function GameRecordsListSB({ uid }) {
                                 style={{ height: "auto" }}
                             >
                                 <ModalHeader toggle={toggleUpload} close={closeBtnUpload}>
-                                    <PrimaryTitle text={t("referee.record.upload")} />
+                                    <div
+                                        className="page-primary-title"
+                                        style={{
+                                            marginLeft: "6px",
+                                            borderBottom: "0",
+                                            marginBottom: "0",
+                                            color: "tomato",
+                                        }}
+                                    >
+                                        {t("referee.record.upload")}
+                                    </div>
                                 </ModalHeader>
                                 <ModalBody>
                                     <UploadRefereeGameFilesSB
@@ -932,7 +1042,17 @@ export default function GameRecordsListSB({ uid }) {
                                 style={{ height: "auto" }}
                             >
                                 <ModalHeader toggle={toggleDownload} close={closeBtnDownload}>
-                                    <PrimaryTitle text={t("referee.record.download")} />
+                                    <div
+                                        className="page-primary-title"
+                                        style={{
+                                            marginLeft: "6px",
+                                            borderBottom: "0",
+                                            marginBottom: "0",
+                                            color: "tomato",
+                                        }}
+                                    >
+                                        {t("referee.record.download")}
+                                    </div>
                                 </ModalHeader>
                                 <ModalBody>
                                     <DownloadRefereeGameFilesSB

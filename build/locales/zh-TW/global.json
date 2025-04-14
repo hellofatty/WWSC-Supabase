@@ -7,6 +7,9 @@
         "wwsc-name": "世界WISER運動委員會",
         "loading": "正在加載中...",
         "help": "幫助",
+        "edit": "編輯",
+        "update":"更新",
+        "delete":"刪除",
         "upload": "上傳檔案",
         "download": "下載檔案",
         "add-record-success-message": "新記錄已被成功加入!",
@@ -177,7 +180,7 @@
             "excerpt": "通知摘要",
             "add-success-message": "新通知已被成功加入!",
             "update-success-message": "通知已被成功更新!",
-             "update-error-message": "更新通知有錯誤"
+            "update-error-message": "更新通知有錯誤"
         },
 
         "referee-list": {
@@ -254,7 +257,7 @@
             "years": "年",
             "edit": "編輯更新",
             "delete": "刪 除",
-             "file-too-large": "團體商標檔案必須小於2MB"
+            "file-too-large": "團體商標檔案必須小於2MB"
         },
         "event-list": {
             "title": "WISER 活動清單",
@@ -331,7 +334,6 @@
         "intro": "'/關於我們/Wiser運動簡介/'"
     },
 
-   
     "navbar": {
         "home": "首 頁",
         "about_us": "關於我們",
@@ -889,7 +891,9 @@
             "update-success-message": "記錄已被成功更新!",
             "tooltip-location": "選擇國家或地區",
             "tooltip-auth-orgs": "選擇授權培訓團體",
-            "tooltip-instructor": "選擇培訓講師"
+            "tooltip-instructor": "選擇培訓講師",
+            "select-org-label": "選擇團體",
+            "select-auth-org-label": "選擇授權培訓團體"
         },
         "class": {
             "inputRecord": "輸入記錄",

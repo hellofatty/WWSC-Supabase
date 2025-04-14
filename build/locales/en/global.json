@@ -7,6 +7,9 @@
         "wwsc-name": "World Wiser Sport Committee",
         "loading": "Loading...",
         "help": "Help",
+        "edit": "EDIT",
+        "update":"UPDATE",
+        "delete":"DELETE",
         "upload": "UPLOAD",
         "download": "DOWNLOAD",
         "add-record-success-message": "The record has been successfully added!",
@@ -911,7 +914,9 @@
             "update-success-message": "The record has been successfully updated!",
             "tooltip-location": "Select Country/Region",
             "tooltip-auth-orgs": "Select Authorized Training Organizations",
-            "tooltip-instructor": "Select Training Instructor"
+            "tooltip-instructor": "Select Training Instructor",
+            "select-org-label": "Select an organization",
+            "select-auth-org-label": "Select an authorized organization"
         },
         "class": {
             "inputRecord": "Input Record",

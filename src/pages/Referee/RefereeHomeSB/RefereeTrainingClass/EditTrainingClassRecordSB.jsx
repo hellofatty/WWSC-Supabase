@@ -1,87 +1,132 @@
 /** @format */
 
 import "./EditTrainingClassRecord.css";
-
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "../../../../supabase/supabaseClient";
 import { toast } from "react-toastify";
 import moment from "moment";
-
-import { useState, useEffect } from "react";
-import { useCollection } from "../../../../hooks/useCollection";
-
-import { Timestamp } from "firebase/firestore";
 import { Button, Form, FormGroup, Label, Row, Col, Input } from "reactstrap";
-
-import { useFirestore } from "../../../../hooks/useFirestore";
-
 import { useTranslation } from "react-i18next";
 
 import CountryListEn from "../../../../components/CountryList/CountryListEn";
 import CountryListTw from "../../../../components/CountryList/CountryListTw";
 import CountryListCn from "../../../../components/CountryList/CountryListCn";
 import Select from "react-select";
-import { useLocation, useNavigate } from "react-router-dom";
+// import { useLocation, useNavigate } from "react-router-dom";
+import { CircularProgress } from "@mui/material";
 
-export default function EditTrainingClassRecord({ toggle, uid, record }) {
+export default function EditTrainingClassRecordSB({ toggle, uid, record }) {
     const { t, i18n } = useTranslation("global");
     const lang = i18n.language;
-      const navigate = useNavigate();
-          const location = useLocation();
+    // const navigate = useNavigate();
+    // const location = useLocation();
 
-    const { documents: orgList } = useCollection("organizations", ["status", "==", "active"], ["createdAt", "asc"]);
-    // console.log(orgList);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-    const [organizations, setOrganizations] = useState([]);
+    // Convert the date format
+    const convertedDate = moment.utc(record.date).format("YYYY-MM-DD");
+    const [date, setDate] = useState(convertedDate);
+    const [course, setCourse] = useState(record.course || "");
+    const [number, setNumber] = useState(record.number || "");
+    const [note, setNote] = useState(record.note || "");
+    const [org, setOrg] = useState(
+        record.org_id
+            ? {
+                  value: record.org_id,
+                  label: record.org?.name,
+                  labelTw: record.org?.name_tw,
+                  labelCn: record.org?.name_cn,
+              }
+            : null
+    );
+    const [country, setCountry] = useState(
+        record.country_en
+            ? {
+                  label: record.country_en.label,
+                  value: record.country_en.value,
+              }
+            : null
+    );
+    const [countryTw, setCountryTw] = useState(
+        record.country_tw
+            ? {
+                  label: record.country_tw.label,
+                  value: record.country_tw.value,
+              }
+            : null
+    );
+    const [countryCn, setCountryCn] = useState(
+        record.country_cn
+            ? {
+                  label: record.country_cn.label,
+                  value: record.country_cn.value,
+              }
+            : null
+    );
+
+    const [orgs, setOrgs] = useState([]);
+
+    // Fetch organizations
+    const fetchOrgs = useCallback(async () => {
+        try {
+            const { data, error } = await supabase.from("organizations").select().eq("status", "active").order("name");
+
+            if (error) throw error;
+
+            setOrgs(
+                data.map((org) => ({
+                    value: org.id,
+                    label: org.name,
+                    labelTw: org.name_tw,
+                    labelCn: org.name_cn,
+                }))
+            );
+        } catch (err) {
+            console.error("Error fetching organizations:", err);
+            setError(err.message);
+        }
+    }, []);
 
     useEffect(() => {
-        if (orgList) {
-            setOrganizations(
-                orgList.map((org) => {
-                    return {
-                        value: { ...org, id: org.id },
-                        label: org.name,
-                    };
-                })
-            );
-        }
-    }, [orgList]);
+        fetchOrgs();
+    }, [fetchOrgs]);
 
-    const convertedDate = moment.utc(record.date.toDate()).format("yyyy-MM-DD");
-    const [date, setDate] = useState(convertedDate);
-    const [course, setCourse] = useState(record.course);
-    const [organization, setOrganization] = useState(record.organization);
-    const [number, setNumber] = useState(record.number);
-    const [country, setCountry] = useState(record.country);
-    const [countryTw, setCountryTw] = useState(record.countryTw);
-    const [countryCn, setCountryCn] = useState(record.countryCn);
-    const [note, setNote] = useState(record.note);
-
-    const { updateDocument, response } = useFirestore(`users/${uid}/class`);
-
-    const showToastMessage = () => {
-        toast.success(i18n.t("referee.class.update-success-message"));
-    };
-
-    const handleUpdate = (e) => {
+    const handleUpdate = async (e) => {
         e.preventDefault();
+        setLoading(true);
 
-        updateDocument(record.id, {
-            date: Timestamp.fromDate(new Date(date)),
-            course,
-            organization,
-            number,
-            country,
-            countryTw,
-            countryCn,
-            uid,
-            year: new Date(date).getFullYear().toString(),
-            month: new Date(date).toLocaleString("default", { month: "long" }),
-            note,
-        });
+        try {
+            const { error } = await supabase
+                .from("class")
+                .update({
+                    date: moment(date).toISOString(),
+                    course,
+                    org_id: org?.value,
+                    number,
+                    country_en: country,
+                    country_tw: countryTw,
+                    country_cn: countryCn,
+                    user_id: uid,
+                    year: moment(date).year().toString(),
+                    month: moment(date).format("MMMM"),
+                    note,
+                    updated_at: new Date().toISOString(),
+                })
+                .eq("id", record.id)
+                .eq("user_id", uid);
 
-        console.log("response", response);
-        showToastMessage();
-        navigate(location.pathname); // Navigate to the current path
-        toggle();
+            if (error) throw error;
+
+            toast.success(t("referee.class.update-success-message"));
+            toggle();
+        } catch (err) {
+            console.error("Error updating class record:", err);
+            toast.error(t("general.error-message"));
+            // navigate(location.pathname);
+        } finally {
+            setLoading(false);
+        }
     };
 
     // console.log(record.id, record);
@@ -109,7 +154,9 @@ export default function EditTrainingClassRecord({ toggle, uid, record }) {
                 <div className="training">
                     <Form onSubmit={handleUpdate}>
                         <div className="modal-form-input-container">
-                        <small style={{color:"grey", fontSize:"0.75rem"}}>*{t("general.required-fields")}</small>
+                            <small style={{ color: "grey", fontSize: "0.75rem" }}>
+                                *{t("general.required-fields")}
+                            </small>
                             <Row>
                                 <Col md={6}>
                                     <FormGroup>
@@ -159,35 +206,37 @@ export default function EditTrainingClassRecord({ toggle, uid, record }) {
 
                                         {lang === "en" && (
                                             <Select
-                                                options={organizations}
-                                                getOptionLabel={(option) => option.label}
-                                                onChange={(newValue) => setOrganization(newValue)}
+                                                placeholder="Select an auth. training org...."
+                                                options={orgs}
+                                                getOptionLabel={(option) => option?.label}
+                                                onChange={(newValue) => setOrg(newValue)}
                                                 styles={CustomStyles}
-                                                value={organizations.filter(function (option) {
-                                                    return option?.label === organization?.label;
+                                                value={orgs.filter(function (option) {
+                                                    return option?.value === org?.value;
                                                 })}
-                                                
                                             />
                                         )}
                                         {lang === "zh-TW" && (
                                             <Select
-                                                options={organizations}
-                                                getOptionLabel={(option) => option.value?.nameTw}
-                                                onChange={(newValue) => setOrganization(newValue)}
+                                                placeholder="選擇授權培訓團體..."
+                                                options={orgs}
+                                                getOptionLabel={(option) => option?.labelTw}
+                                                onChange={(newValue) => setOrg(newValue)}
                                                 styles={CustomStyles}
-                                                value={organizations.filter(function (option) {
-                                                    return option.value?.nameTw === organization.value?.nameTw;
+                                                value={orgs.filter(function (option) {
+                                                    return option?.value === org?.value;
                                                 })}
                                             />
                                         )}
                                         {lang === "zh-CN" && (
                                             <Select
-                                                options={organizations}
-                                                getOptionLabel={(option) => option.value.nameCn}
-                                                onChange={(newValue) => setOrganization(newValue)}
+                                                placeholder="选择授权培训团体..."
+                                                options={orgs}
+                                                getOptionLabel={(option) => option.labelCn}
+                                                onChange={(newValue) => setOrg(newValue)}
                                                 styles={CustomStyles}
-                                                value={organizations.filter(function (option) {
-                                                    return option.value?.nameCn === organization.value?.nameCn;
+                                                value={orgs.filter(function (option) {
+                                                    return option?.value === org?.value;
                                                 })}
                                             />
                                         )}
@@ -247,8 +296,21 @@ export default function EditTrainingClassRecord({ toggle, uid, record }) {
                             </FormGroup>
                         </div>
                         <div style={{ width: "150px", marginTop: "20px" }} className="modal-form-action-buttons">
-                            <Button variant="contained" color="primary" size="sm" style={{ width: "100%" }}>
-                                {t("referee.class.update")}
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                size="sm"
+                                style={{ width: "100%" }}
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <span>
+                                        <CircularProgress size={20} style={{ color: "teal" }} />
+                                        {t("general.loading")}
+                                    </span>
+                                ) : (
+                                    t("general.update")
+                                )}
                             </Button>
                         </div>
                     </Form>

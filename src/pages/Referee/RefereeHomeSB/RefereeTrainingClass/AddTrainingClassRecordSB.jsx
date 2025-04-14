@@ -11,8 +11,10 @@ import CountryListEn from "../../../../components/CountryList/CountryListEn";
 import CountryListTw from "../../../../components/CountryList/CountryListTw";
 import CountryListCn from "../../../../components/CountryList/CountryListCn";
 import "./AddTrainingClassRecord.css";
+import moment from "moment";
 
 export default function AddTrainingClassRecordSB({ toggle, uid }) {
+    
     const { t, i18n } = useTranslation("global");
     const lang = i18n.language;
     const navigate = useNavigate();
@@ -22,7 +24,7 @@ export default function AddTrainingClassRecordSB({ toggle, uid }) {
     // Form states
     const [date, setDate] = useState("");
     const [course, setCourse] = useState("");
-    const [organization, setOrganization] = useState(null);
+    const [org, setOrg] = useState(null);
     const [number, setNumber] = useState("");
     const [country, setCountry] = useState(null);
     const [countryTw, setCountryTw] = useState(null);
@@ -47,7 +49,7 @@ export default function AddTrainingClassRecordSB({ toggle, uid }) {
 
             setOrgs(
                 data.map((org) => ({
-                    value: org,
+                    value: org.id,
                     label: org.name,
                     labelTw: org.name_tw,
                     labelCn: org.name_cn,
@@ -63,18 +65,35 @@ export default function AddTrainingClassRecordSB({ toggle, uid }) {
         setLoading(true);
 
         try {
-            const { error } = await supabase.from("class").insert({
+            const { error } = await supabase
+                .from("class")
+                .insert({
                 user_id: uid,
-                date: new Date(date).toISOString(),
+                date: moment(date).toISOString(),
                 course,
-                org_id: organization?.value?.id,
+                org_id: org?.value,
                 number: parseInt(number),
-                country_en: country,
-                country_tw: countryTw,
-                country_cn: countryCn,
+                country_en: country
+                    ? {
+                          label: country.label,
+                          value: country.value,
+                      }
+                    : null,
+                country_tw: countryTw
+                    ? {
+                          label: countryTw.label,
+                          value: countryTw.value,
+                      }
+                    : null,
+                country_cn: countryCn
+                    ? {
+                          label: countryCn.label,
+                          value: countryCn.value,
+                      }
+                    : null,
+                year: moment(date).year().toString(),
+                month: moment(date).format("MMMM"),
                 note,
-                year: new Date(date).getFullYear().toString(),
-                month: new Date(date).toLocaleString("default", { month: "long" }),
             });
 
             if (error) throw error;
@@ -94,7 +113,7 @@ export default function AddTrainingClassRecordSB({ toggle, uid }) {
     const reset = () => {
         setDate("");
         setCourse("");
-        setOrganization(null);
+        setOrg(null);
         setNumber("");
         setCountry(null);
         setCountryTw(null);
@@ -180,25 +199,28 @@ export default function AddTrainingClassRecordSB({ toggle, uid }) {
 
                                         {lang === "en" && (
                                             <Select
+                                            placeholder="Select an authorized organization..."
                                                 options={orgs}
+                                                value={org}
                                                 getOptionLabel={(option) => `${option.label} (${option.value.status})`}
-                                                onChange={(newValue) => setOrganization(newValue)}
+                                                onChange={(newValue) => setOrg(newValue)}
                                                 styles={CustomStyles}
+                                                isSearchable={true}
                                             />
                                         )}
                                         {lang === "zh-TW" && (
                                             <Select
                                                 options={orgs}
-                                                getOptionLabel={(option) => `${option.value.nameTw} (有效)`}
-                                                onChange={(newValue) => setOrganization(newValue)}
+                                                getOptionLabel={(option) => `${option.labelTw} (有效)`}
+                                                onChange={(newValue) => setOrg(newValue)}
                                                 styles={CustomStyles}
                                             />
                                         )}
                                         {lang === "zh-CN" && (
                                             <Select
-                                                options={organizations}
-                                                getOptionLabel={(option) => `${option.value.nameCn} (有效)`}
-                                                onChange={(newValue) => setOrganization(newValue)}
+                                                options={orgs}
+                                                getOptionLabel={(option) => `${option.labelCn} (有效)`}
+                                                onChange={(newValue) => setOrg(newValue)}
                                                 styles={CustomStyles}
                                             />
                                         )}

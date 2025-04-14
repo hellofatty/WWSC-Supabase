@@ -1,7 +1,7 @@
 /** @format */
 
 import "./RefereeListPublic.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../../../supabase/supabaseClient";
 import SearchIcon from "@mui/icons-material/Search";
 import Tooltip from "@mui/material/Tooltip";
@@ -16,28 +16,55 @@ export default function RefereeListPublicSB() {
     const [loading, setLoading] = useState(true);
 
     // Fetch referees from Supabase
-    useEffect(() => {
-        const fetchReferees = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from("referees")
-                    .select("*")
-                    .in("grade", ["3", "4"])
-                    .order("referee_id", { ascending: true });
+    const fetchReferees = useCallback(async () => {
+        try {
+            setLoading(true);
+            const { data, error } = await supabase
+                .from("referees")
+                .select("*")
+                .in("grade", ["3", "4"])
+                .order("referee_id", { ascending: true });
 
-                if (error) throw error;
-
-                setRefereeList(data);
-            } catch (err) {
-                console.error("Error fetching referees:", err);
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchReferees();
+            if (error) throw error;
+            setRefereeList(data);
+        } catch (err) {
+            console.error("Error fetching referees:", err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
     }, []);
+
+    // Initial data fetch
+    useEffect(() => {
+        fetchReferees();
+    }, [fetchReferees]);
+
+    // Set up realtime subscriptions
+    useEffect(() => {
+        // Subscribe to referees table changes
+        const refereesSubscription = supabase
+            .channel('public-referees')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'referees',
+                    filter: "grade=in.('3','4')"
+                },
+                (payload) => {
+                    console.log('Referee change received:', payload);
+                    fetchReferees();
+                }
+            )
+            .subscribe();
+
+        // Cleanup subscription on unmount
+        return () => {
+            supabase.removeChannel(refereesSubscription);
+        };
+    }, [fetchReferees]);
 
     return (
         <>

@@ -1,6 +1,6 @@
 /** @format */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "../../../supabase/supabaseClient";
 import "./GlobalLink.css";
@@ -40,13 +40,12 @@ export default function GlobalLinkSB() {
     const [rowsPerPage, setRowsPerPage] = useState(25);
 
     // Fetch organizations
-    useEffect(() => {
-        const fetchOrganizations = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from("organizations")
-                    .select(
-                        `
+    const fetchOrganizations = useCallback(async () => {
+        try {
+            setLoading(true);
+            const { data, error } = await supabase
+                .from("organizations")
+                .select(`
                     id,
                     name,
                     name_tw,
@@ -65,24 +64,48 @@ export default function GlobalLinkSB() {
                     country_label: country_en->label,
                     country_label_tw: country_tw->label,
                     country_label_cn: country_cn->label 
-                `
-                    )
-                    // .neq('name', 'World Wiser Sport Committee')
-                    .order("name", { ascending: true });
+                `)
+                .order("name", { ascending: true });
 
-                if (error) throw error;
-                setOrganizations(data);
-                console.log(organizations);
-            } catch (err) {
-                console.error("Error fetching organizations:", err);
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchOrganizations();
+            if (error) throw error;
+            setOrganizations(data);
+        } catch (err) {
+            console.error("Error fetching organizations:", err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
     }, []);
+
+    // Initial data fetch
+    useEffect(() => {
+        fetchOrganizations();
+    }, [fetchOrganizations]);
+
+    // Set up realtime subscriptions
+    useEffect(() => {
+        // Subscribe to organizations table changes
+        const orgsSubscription = supabase
+            .channel('global-links-orgs')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'organizations'
+                },
+                (payload) => {
+                    console.log('Organization change received:', payload);
+                    fetchOrganizations();
+                }
+            )
+            .subscribe();
+
+        // Cleanup subscription on unmount
+        return () => {
+            supabase.removeChannel(orgsSubscription);
+        };
+    }, [fetchOrganizations]);
 
     // Helper functions
     const removeDuplicates = (arr) => [...new Set(arr)];

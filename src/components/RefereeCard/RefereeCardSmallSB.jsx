@@ -6,10 +6,6 @@ import "./RefereeCard.css";
 // import Avatar from "../Avatar/Avatar";
 import { useState } from "react";
 
-// import { useAuthContext } from "../../hooks/useAuthContext";
-// import { projectFirestore } from "../../firebase/config";
-// import { getDoc } from "firebase/firestore";
-
 import CircularProgress from "@mui/material/CircularProgress";
 // import { useMediaQuery } from "@mui/material";
 
@@ -35,7 +31,7 @@ import {
 import BasicModal from "../MyModal/MyJoyModal";
 
 // ==============Create Referee ID Card component==========
-export default function RefereeCardSmall({ referee }) {
+export default function RefereeCardSmallSB({ referee }) {
     const { t, i18n } = useTranslation("global");
     const lang = i18n.language;
     // const { user } = useAuthContext();

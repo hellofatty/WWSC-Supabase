@@ -2,7 +2,7 @@
 
 import "./Profile.css";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
 import Button from "@mui/material/Button";
@@ -25,31 +25,90 @@ export default function ProfileSB({ referee }) {
     const mb = useMediaQuery("(max-width:600px)");
     const lang = i18n.language;
     // console.log(referee);
-
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [modal, setModal] = useState(false);
 
     const [orgData, setOrgData] = useState(null);
 
       // Fetch organization data when referee loads
-      useEffect(() => {
-        const fetchOrgData = async () => {
-            if (referee?.org_id) {
-                const { data, error } = await supabase
-                    .from('organizations')
-                    .select('name, name_tw, name_cn')
-                    .eq('id', referee.org_id)
-                    .single();
+      const fetchOrgData = useCallback(async () => {
+        if (!referee?.org_id) return;
+        
+        try {
+            setLoading(true);
+            const { data, error } = await supabase
+                .from('organizations')
+                .select('name, name_tw, name_cn')
+                .eq('id', referee.org_id)
+                .single();
 
-                if (error) {
-                    console.error('Error fetching organization:', error);
-                    return;
-                }
+            if (error) throw error;
+            setOrgData(data);
+        } catch (err) {
+            console.error('Error fetching organization:', err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    }, [referee?.org_id]);
 
-                setOrgData(data);
-            }
-        };
-
+    // Initial data fetch
+    useEffect(() => {
         fetchOrgData();
-      }, [referee?.org_id]);
+    }, [fetchOrgData]);
+
+    // Set up realtime subscriptions
+    useEffect(() => {
+        if (!referee?.org_id) return;
+
+        // Subscribe to organizations table changes
+        const orgsSubscription = supabase
+            .channel('profile-org-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'organizations',
+                    filter: `id=eq.${referee.org_id}`
+                },
+                (payload) => {
+                    console.log('Organization change received:', payload);
+                    fetchOrgData();
+                }
+            )
+            .subscribe();
+
+        // Subscribe to referees table changes
+        const refereesSubscription = supabase
+            .channel('profile-referee-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'referees',
+                    filter: `id=eq.${referee.id}`
+                },
+                (payload) => {
+                    console.log('Referee change received:', payload);
+                    // Handle referee updates if needed
+                }
+            )
+            .subscribe();
+
+        // Cleanup subscriptions
+        return () => {
+            supabase.removeChannel(orgsSubscription);
+            supabase.removeChannel(refereesSubscription);
+        };
+    }, [referee?.org_id, referee?.id, fetchOrgData]);
+
+    // Add loading and error handling to the return statement
+    if (error) {
+        return <div className="error-message">{error}</div>;
+    }
       
     // Get organization name based on current language
       const getOrgName = () => {
@@ -79,7 +138,7 @@ const getCountryName = () => {
 };
 
     
-    const [modal, setModal] = useState(false);
+    
     const toggle = () => setModal(!modal);
     const closeBtn = (
         <Button onClick={toggle}>
